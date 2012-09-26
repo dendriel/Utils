@@ -1,5 +1,5 @@
-
 require('class')
+-- ref: http://lua-users.org/wiki/SimpleLuaClasses
 
 A = class()
 function A:init(x)
