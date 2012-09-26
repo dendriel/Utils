@@ -6,7 +6,7 @@
 # Description:                                                  #
 #  This class allows you to comunicate with gsm modules by at   #
 # commands. Initially created composing an abstraction to use   #
-# the sms service by the base methods of the base class.        #
+# the sms service by the methods of the base class.             #
 #################################################################
 import serial
 from time import sleep
