@@ -1,5 +1,5 @@
 require('class')
-
+-- vitor.rozsa
 MAX_TURNS = 11
 MAX_SHOUTS = MAX_TURNS*2
 SHOUT1 = 1
