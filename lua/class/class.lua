@@ -1,6 +1,6 @@
 -- class.lua
 -- ref: http://lua-users.org/wiki/SimpleLuaClasses
--- Compatible with Lua 5.1 (not 5.0).
+-- WARNING - Compatible with Lua 5.1 (not 5.0). 
 function class(base, init)
    local c = {}    -- a new class instance
    if not init and type(base) == 'function' then
@@ -22,12 +22,12 @@ function class(base, init)
    mt.__call = function(class_tbl, ...)
    local obj = {}
    setmetatable(obj,c)
-   if class then
+   if class_tbl.init then
       class_tbl.init(obj,...)
-   else 
+   else
       -- make sure that any stuff from the base class is initialized!
       if base and base.init then
-      base.init(obj, ...)
+         base.init(obj, ...)
       end
    end
    return obj
