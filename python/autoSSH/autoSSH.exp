@@ -1,0 +1,19 @@
+set ip_addr [lindex $argv 0]
+set passwd [lindex $argv 1]
+set timeout -1
+
+set logName "root"
+
+# launch the application
+spawn ssh $logName@$ip_addr
+
+# waits for response
+expect "*?assword:*"
+
+# sends the password
+send -- "$passwd\r"
+
+send -- "\r"
+
+# let you use de cli
+interact
