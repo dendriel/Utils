@@ -6,7 +6,7 @@
 # Version: 1.0                                                  #
 #                                                               #
 # Description:                                                  #
-# TO BE UPDATED! This scripts was made without time and coffee..#
+# TO BE UPDATED! This scripts were made without time and coffee.#
 # auto connect into remote host with ssh.                       #
 # will use with an alias, like "$s 223", then, the# script      #
 # will look for the in the passwords file for the pass for      #
