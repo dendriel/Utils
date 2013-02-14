@@ -12,6 +12,7 @@
 
 
  /* actually, i found this function at some C reference */
+//int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y);
 int timeval_subtract (result, x, y)
           struct timeval *result, *x, *y;
      {
