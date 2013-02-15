@@ -1,5 +1,5 @@
 ##
-# Makefile for compiling liblinked_list.o
+# Makefile for compiling linked_list.o
 # Author: vitor.rozsa
 # date: 14/02/2013
 ##
