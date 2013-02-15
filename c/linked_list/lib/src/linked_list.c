@@ -74,7 +74,6 @@ st_list_item *list_get_item(st_list *mlist, unsigned int index)
 
 void list_destroy(st_list **mlist)
 {
-	int count = 0;
 	st_list_item *cur = NULL;
 	st_list_item *after = NULL;
 
@@ -93,7 +92,6 @@ void list_destroy(st_list **mlist)
 		free((**mlist).first->data);
 	}
 	free((**mlist).first);
-	count++;
 
 	while(after) {
 		cur = after;
@@ -102,7 +100,6 @@ void list_destroy(st_list **mlist)
 			free(cur->data);
 		}
 		free(cur);
-		count++;
 	}
 
 	free(*mlist);
