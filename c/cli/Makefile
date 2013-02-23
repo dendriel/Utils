@@ -26,6 +26,8 @@ ifeq ($(ENABLE_EFENCE), ENABLED)
 	LIBS += -lefence
 endif
 
+TEMP_FILES := .cproject .project
+
 $(TARGET): $(SOURCE) $(OBJ_ADD)
 	$(COMPILER) $(CFLAGS) $(SOURCE) $(INCLUDES) $(OBJ_ADD) $(LIBS) -o $(TARGET) 
 	
@@ -39,6 +41,8 @@ clean:
 	@rm -f $(TARGET)
 	@echo "rm -f $(OBJ_ADD)"
 	@rm -f $(OBJ_ADD)
+	@echo "rm -f $(TEMP_FILES)"
+	@rm -f $(TEMP_FILES)
 	
 #  ".PHONY" specifies that target help is not a file,
 # even if there is a "help" file in the directory.

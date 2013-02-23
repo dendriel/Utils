@@ -1,0 +1,37 @@
+
+
+	a  = 10
+	&a = 0xbfbb5e40
+
+	*pt = 10
+	pt  = 0xbfbb5e40
+	&pt = 0xbfbb5e44
+
+	**ptt = 10
+	*ptt  = 0xbfbb5e40
+	ptt   = 0xbfbb5e44
+	&ptt  = 0xbfbb5e48
+
+	***pttt = 10
+	**pttt  = 0xbfbb5e40
+	*pttt   = 0xbfbb5e44
+	pttt    = 0xbfbb5e48
+	&pttt   = 0xbfbb5e4c
+
+	a  = 10
+	&a = 0xbfbb5e40
+
+	*pt = 10         =  a
+	pt  = 0xbfbb5e40 = &a
+	&pt = 0xbfbb5e44
+
+	**ptt = 10         = *pt =  a
+	*ptt  = 0xbfbb5e40 =  pt = &a
+	ptt   = 0xbfbb5e44 = &pt
+	&ptt  = 0xbfbb5e48
+
+	***pttt = 10         = **ptt = *pt =  a
+	**pttt  = 0xbfbb5e40 =  *ptt =  pt = &a
+	*pttt   = 0xbfbb5e44 =   ptt = &pt
+	pttt    = 0xbfbb5e48 =  &ptt
+	&pttt   = 0xbfbb5e4c

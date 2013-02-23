@@ -31,7 +31,7 @@ static int find_free_cli_instance(void);
 static void *server_thread(void *data);
 static int create_comm_stream(const unsigned int port, const unsigned int max_user);
 static int server_read_cmd(const int client_fd, char *cmd);
-static int server_validate_cmd(const int client_fd, char *cmd, char *cmd_args[]);
+static int server_split_cmd(const int client_fd, char *cmd, char *cmd_args[]);
 static int server_execute_cmd(const int client_fd, char *cmd);
 
 /* Global Definitions */
@@ -189,7 +189,7 @@ static void *server_thread(void *data)
 			continue;
 		}
 
-		ret = server_validate_cmd(client_fd, cmd, cmd_args);
+		ret = server_split_cmd(cmd, cmd_args);
 		if (ret != CLI_ERROR) {
 			for (i = 0; i < ret; i++) {
 				printf("> %s\n", cmd_args[i]);
@@ -227,11 +227,11 @@ static int server_read_cmd(const int client_fd, char *cmd)
 }
 
 /*
- * brief Verify if command is valid; Returns a list that the first elements
+ * brief Returns a list that the first elements
  *  will be the function to be run and the following elements will be the
  *  arguments. ??????? maybe..
  */
-static int server_validate_cmd(const int client_fd, char *cmd, char **cmd_args)
+static int server_split_cmd(char *cmd, char **cmd_args)
 {
 	int ind = 0;
 	char *saveptr = NULL;
@@ -385,5 +385,3 @@ static int create_comm_stream(const unsigned int port, const unsigned int max_us
 
 	return server_fd;
 }
-
-
