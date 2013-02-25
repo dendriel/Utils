@@ -31,7 +31,7 @@ static int find_free_cli_instance(void);
 static void *server_thread(void *data);
 static int create_comm_stream(const unsigned int port, const unsigned int max_user);
 static int server_read_cmd(const int client_fd, char *cmd);
-static int server_split_cmd(const int client_fd, char *cmd, char *cmd_args[]);
+static int server_split_cmd(char *cmd, char ***cmd_args);
 static int server_execute_cmd(const int client_fd, char *cmd);
 
 /* Global Definitions */
@@ -45,13 +45,13 @@ static int cli_instances_number;
 int cli_lib_init(const unsigned int instances_number)
 {
 	if (cli_initialized == true) {
-		return -1;
+		return CLI_ERROR;
 	}
 
 	cli_instances_data = (st_cli_instance *) malloc(instances_number * sizeof(st_cli_instance));
 	if (!cli_instances_data) {
 		fprintf(stderr, "Failed to allocate memory for cli_instances_data!\n");
-		return -1;
+		return CLI_ERROR;
 	}
 
 	memset(cli_instances_data, 0, (sizeof(st_cli_instance) * instances_number));
@@ -67,7 +67,7 @@ int cli_lib_init(const unsigned int instances_number)
 		dump_instances_cfg(cli_instances_data, cli_instances_number);
 	}
 
-	return 0;
+	return CLI_OK;
 }
 
 void cli_lib_halt(void)
@@ -88,29 +88,29 @@ int cli_start_instance(const unsigned int port, const unsigned int max_user, con
 	int cli_instance_id;
 
 	if (cli_initialized == false) {
-		return -1;
+		return CLI_ERROR;
 	}
 
 	if (port > 65535) {
 		fprintf(stderr, "Port out of range! Port: [%d]\n", port);
-		return -1;
+		return CLI_ERROR;
 	}
 
 	if (hello_message == NULL) {
 		fprintf(stderr, "Hello Message can't have a null value!\n");
-		return -1;
+		return CLI_ERROR;
 	}
 
 	cli_instance_id = find_free_cli_instance();
 	if (cli_instance_id < 0) {
 		fprintf(stderr, "There is no free CLI instance to be used!\n");
-		return -1;
+		return CLI_ERROR;
 	}
 
 	server_fd = create_comm_stream(port, max_user);
 	if (server_fd < 0) {
 		fprintf(stderr, "Failed to create and configure the socket stream!\n");
-		return -1;
+		return CLI_ERROR;
 	}
 
 	strncpy(cli_instances_data[cli_instance_id].hello_message, hello_message, CLI_SIZEOF_HELLO_MESSAGE);
@@ -139,16 +139,16 @@ int cli_launch(const int cli_id)
 
 	if ( (cli_initialized == false) || (cli_instances_data[cli_id].initialized == false) ||
 			(cli_instances_data[cli_id].thread_id > -1) ) {
-		return -1;
+		return CLI_ERROR;
 	}
 
 	ret = pthread_create(&cli_instances_data[cli_id].thread_id, NULL, server_thread, (void*) &cli_instances_data[cli_id]);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to launch the new thread.\n");
-		return -1;
+		return CLI_ERROR;
 	}
 
-	return 0;
+	return CLI_OK;
 }
 
 /*******************************************************/
@@ -165,8 +165,6 @@ static void *server_thread(void *data)
 	char **cmd_args = NULL;
 	int client_fd;
 	int ret;
-
-	int i = 0; //testing!!!
 
 	cli_instance = (st_cli_instance *) data;
 
@@ -189,11 +187,10 @@ static void *server_thread(void *data)
 			continue;
 		}
 
-		ret = server_split_cmd(cmd, cmd_args);
-		if (ret != CLI_ERROR) {
-			for (i = 0; i < ret; i++) {
-				printf("> %s\n", cmd_args[i]);
-			}
+		ret = server_split_cmd(cmd, &cmd_args);
+		if (ret != CLI_OK) {
+            free(cmd_args);
+            return 0;
 		}
 
 		ret = server_execute_cmd(client_fd, cmd);
@@ -201,6 +198,8 @@ static void *server_thread(void *data)
 	} while (ret != CLI_EXIT);
 
 	close(client_fd);
+
+    free(cmd_args);
 
 	return 0;
 }
@@ -227,40 +226,61 @@ static int server_read_cmd(const int client_fd, char *cmd)
 }
 
 /*
- * brief Returns a list that the first elements
- *  will be the function to be run and the following elements will be the
- *  arguments. ??????? maybe..
+ * brief Sṕlit the entry string into an array with elements.
+ * The last element will be NULL so if we can iterate the pointer.
  */
-static int server_split_cmd(char *cmd, char **cmd_args)
+static int server_split_cmd(char *cmd, char ***cmd_args)
 {
-	int ind = 0;
-	char *saveptr = NULL;
-	const char *delim = " ";
-	char *elem = NULL;
+    char *saveptr;
+    char *elem = NULL;
+    char **allpt = NULL;
+    char **cmd_vet;
+    const char *delim = " ";
+    int ind = 0;
 
-	elem = strtok_r(cmd, delim, &saveptr);
-	if (elem == NULL) {
-		return CLI_OK;
-	}
+    elem = strtok_r(cmd, delim, &saveptr);
+    if (elem == NULL) {
+        return CLI_ERROR;
+    }
 
-	printf("point [0] elem: %s\n", elem);
+    cmd_vet = (char **)malloc(sizeof(char *));
+    if (cmd_vet == NULL) {
+        fprintf(stderr, "Failed to allocate memory!\n");
+        return CLI_ERROR;
+    }
 
-	*cmd_args = (char *) malloc(sizeof(char));
-	printf("point [0] elem: %s\n", elem);
-	cmd_args[ind] = elem;
-	ind++;
+    cmd_vet[ind] = elem;
+    ind++;
 
-	printf("point [1]\n");
+    elem = strtok_r(NULL, delim, &saveptr);
+    while (elem != NULL) {
 
-	elem = strtok_r(cmd, delim, &saveptr);
-	while (elem != NULL) {
-		cmd_args[ind] = (char *) realloc(cmd_args, sizeof(char));
-		cmd_args[ind] = elem;
-		ind++;
-		printf("point [2]\n");
-	}
-	printf("point [3]\n");
-	return (ind + 1);
+        allpt = (char **) realloc(cmd_vet, sizeof(char *) * (ind+1));
+        if (allpt == NULL) {
+            fprintf(stderr, "Failed to realloc!\n");
+            free(cmd_vet);
+            return CLI_ERROR;
+        }
+
+        cmd_vet = allpt;
+        cmd_vet[ind] = elem;
+        elem = strtok_r(NULL, delim, &saveptr);
+        ind++;
+    }
+
+    allpt = (char **) realloc(cmd_vet, sizeof(char *) * (ind+1));
+    if (allpt == NULL) {
+        printf("Failed to realloc!\n");
+        free(cmd_vet);
+        return CLI_ERROR;
+    }
+
+    cmd_vet = allpt;
+    cmd_vet[ind] = NULL;
+
+    *cmd_args = cmd_vet;
+
+    return CLI_OK;
 }
 
 /*
@@ -337,7 +357,7 @@ static int find_free_cli_instance(void)
 		}
 	}
 
-	return -1;
+	return CLI_ERROR;
 }
 
 /*
@@ -355,7 +375,7 @@ static int create_comm_stream(const unsigned int port, const unsigned int max_us
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0 ) {
 		fprintf(stderr, "Failed to created the server socket! Error: [%d]\n", errno);
-		return -1;
+		return CLI_ERROR;
 	}
 
 	serv_addr.sin_family = AF_INET;
@@ -366,21 +386,21 @@ static int create_comm_stream(const unsigned int port, const unsigned int max_us
 	// will set socket options to reuse address
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
 		fprintf(stderr, "Failed to set socket options!\n");
-		return -1;
+		return CLI_ERROR;
 	}
 
 	// bind socket to an address and port
 	if (bind(server_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
 		fprintf(stderr, "Failed to bind socket! Error: [%d]\n", errno);
 		close(server_fd);
-		return -1;
+		return CLI_ERROR;
 	}
 
 	// enable the socket to listen for connections
 	if (listen(server_fd, max_user) < 0) {
 		fprintf(stderr, "Server has failed to listen for connections. Error: [%d]\n", errno);
 		close(server_fd);
-		return -1;
+		return CLI_ERROR;
 	}
 
 	return server_fd;

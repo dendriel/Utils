@@ -30,6 +30,7 @@ static int server_split_cmd(char *cmd, char ***cmd_args)
         printf("Failed to allocate memory!\n");
         return -1;
     }
+
     cmd_vet[ind] = elem;
     ind++;
 
@@ -39,8 +40,10 @@ static int server_split_cmd(char *cmd, char ***cmd_args)
         allpt = (char **) realloc(cmd_vet, sizeof(char *) * (ind+1));
         if (allpt == NULL) {
             printf("Failed to realloc!\n");
+            free(cmd_vet);
             break;
         }
+
         cmd_vet = allpt;
         cmd_vet[ind] = elem;
         elem = strtok_r(NULL, delim, &saveptr);
@@ -50,8 +53,10 @@ static int server_split_cmd(char *cmd, char ***cmd_args)
     allpt = (char **) realloc(cmd_vet, sizeof(char *) * (ind+1));
     if (allpt == NULL) {
         printf("Failed to realloc!\n");
+            free(cmd_vet);
         return -1;
     }
+
     cmd_vet = allpt;
     cmd_vet[ind] = NULL;
 
