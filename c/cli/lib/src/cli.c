@@ -238,23 +238,27 @@ static int server_split_cmd(char *cmd, char ***cmd_args)
     const char *delim = " ";
     int ind = 0;
 
+    // find the first element.
     elem = strtok_r(cmd, delim, &saveptr);
     if (elem == NULL) {
         return CLI_ERROR;
     }
 
+    // alloc memory for a pointer to a pointer of char.
     cmd_vet = (char **)malloc(sizeof(char *));
     if (cmd_vet == NULL) {
         fprintf(stderr, "Failed to allocate memory!\n");
         return CLI_ERROR;
     }
 
+    // save reference and increment the index.
     cmd_vet[ind] = elem;
     ind++;
 
+    // iterate the cmd list while is empty.
     elem = strtok_r(NULL, delim, &saveptr);
     while (elem != NULL) {
-
+        // realloc the memory to make room for +1 element.
         allpt = (char **) realloc(cmd_vet, sizeof(char *) * (ind+1));
         if (allpt == NULL) {
             fprintf(stderr, "Failed to realloc!\n");
@@ -268,6 +272,7 @@ static int server_split_cmd(char *cmd, char ***cmd_args)
         ind++;
     }
 
+    // alloc memory for the last element, that will be NULL as a flag.
     allpt = (char **) realloc(cmd_vet, sizeof(char *) * (ind+1));
     if (allpt == NULL) {
         printf("Failed to realloc!\n");
