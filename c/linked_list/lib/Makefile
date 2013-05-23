@@ -4,24 +4,24 @@
 # date: 14/02/2013
 ##
 
-DIR_TOP := .
+TOP = .
 
-COMPILER := gcc
-CFLAGS := -Wall -c
+CC = gcc
+CFLAGS = -Wall -Werror -c
 
-OBJS := linked_list.o
-OBJS_MOD := 755
+TARGET = linked_list.o
+OBJS_MOD = 755
 
-SOURCE := src/linked_list.c
+SRCS = src/linked_list.c
 
-INCLUDES :=  -I$(DIR_TOP)/inc
+INCLUDES = -I$(TOP)/inc
 
 
 
-$(OBJS): $(SOURCE)
-	@echo "> Will create the objects: $(OBJS)"
-	$(COMPILER) $(CFLAGS) $(SOURCE) $(INCLUDES)
-	@chmod $(OBJS_MOD) $(OBJS)
+$(TARGET): $(SRCS)
+	@echo "> Will create the objects: $(TARGET)"
+	$(CC) $(CFLAGS) $(SRCS) $(INCLUDES)
+	@chmod $(OBJS_MOD) $(TARGET)
 	@echo "> Done."
 
 	
