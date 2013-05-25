@@ -6,6 +6,7 @@
 
 TOP = .
 
+# electric-fence - A malloc(3) debugger
 ENABLE_EFENCE = #ENABLED
 
 CC = gcc
@@ -16,27 +17,28 @@ SOURCE = main.c
 
 INCLUDES = -I$(TOP)/src/inc
 
-OBJS = $(TOP)/src/alarm.o
+OBJS_PATH = src
+OBJS = alarm.o
 
 LDFLAGS =
 LDLIBS = -lpthread -lrt
 
 ifeq ($(ENABLE_EFENCE), ENABLED)
-	LDLIBS += -lefence
+LDLIBS += -lefence
 endif
 
 $(TARGET): $(SOURCE) $(OBJS)
-	$(CC) $(LDFLAGS) $(SOURCE) $(INCLUDES) $(OBJS) $(LDLIBS) -o $(TARGET) 
+	$(CC) $(CFLAGS) -g $(LDFLAGS) $(SOURCE) $(INCLUDES) $(OBJS_PATH)/$(OBJS) $(LDLIBS) -o $(TARGET)
 	
 $(OBJS):
-	@cd $(TOP)/lib/ && make
+	@cd $(TOP)/src/ && make
 
 
 .PHONY: clean
-clean:
+clean: 
 	@echo "rm -f $(TARGET)"
 	@rm -f $(TARGET)
-	@echo "rm -f $(OBJS)"
+	@echo "rm -f $(OBJS_PATH)/$(OBJS)"
 	@rm -f $(OBJS)
 	
 #  ".PHONY" specifies that target help is not a file,

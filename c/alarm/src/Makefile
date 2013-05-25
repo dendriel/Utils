@@ -7,7 +7,7 @@
 TOP = .
 
 CC = gcc
-CFLAGS = -Wall -Werror -c
+CFLAGS = -Wall -Werror
 
 TARGET = alarm.o
 OBJS_MOD = 755
@@ -19,7 +19,7 @@ INCLUDES = -I$(TOP)/inc
 
 $(TARGET): $(SRCS)
 	@echo "> Will create the objects: $(TARGET)"
-	$(CC) $(CFLAGS) $(SRCS) $(INCLUDES)
+	$(CC) $(CFLAGS) -c $(SRCS) $(INCLUDES)
 	@chmod $(OBJS_MOD) $(TARGET)
 	@echo "> Done."
 
