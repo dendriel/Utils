@@ -50,6 +50,13 @@ static void alarm_thread(void *data);
 
 /**************************************************************************************************/
 /**
+ *	\b Find thread entry (index) in the alarms list looking by his thread id.
+ *	\r The thread index (return >= 0) or ALARM_RET_ERROR if the thread is not in the list.
+ */
+static int alarm_thread_get_entry(void);
+
+/**************************************************************************************************/
+/**
  *	\b Save an alarm in the alarms list.
  *	\p index The position of the alarm in the list.
  *	\p tid The running thread that trigger the alarm.
@@ -103,7 +110,6 @@ static en_alarm_ret_code alarm_send_message(st_alarm *alarm)
 	}
 
 	ret = mq_send(dest_mq, alarm->data, sizeof(alarm->data), alarm->priority);
-	printf("sending message!!\n");
 	if (ret != 0) {
 		fprintf(stderr, "Failed to send message. errno: %d; msg: %s\n", errno, strerror(errno));
 		mq_close(dest_mq);
@@ -133,6 +139,42 @@ static void alarm_thread(void *data)
 			fprintf(stderr, "Failed to execute the trigger.\n");
 		}
 	} while (alarm->repeat);
+
+	int entry;
+	en_alarm_ret_code mret;
+	entry = alarm_thread_get_entry();
+	if (entry == ALARM_RET_ERROR) {
+		fprintf(stderr, "The thread can not found his reference in the alarm list. (internal error)\n");
+		return;
+	}
+
+	alarm_remove_trigger_data(entry);
+	mret = alarm_list_free_entry(entry);
+	if (mret != ALARM_RET_SUCCESS) {
+		fprintf(stderr, "The thread failed to remove his reference from the alarm list.\n");
+	}
+
+	return;
+}
+
+/**************************************************************************************************/
+
+static int alarm_thread_get_entry(void)
+{
+	int i;
+	int ret;
+	pthread_t myid;
+
+	myid = pthread_self();
+
+	for (i = 0; i < ALARM_MAX_ENTRY; i++) {
+		ret = pthread_equal(myid, alarms_list[i].tid);
+		if (ret != 0) {
+			return i;
+		}
+	}
+
+	return ALARM_RET_ERROR;
 }
 
 /**************************************************************************************************/
@@ -264,6 +306,10 @@ en_alarm_ret_code alarm_remove_trigger(int entry)
 
 	if ((0 > entry) || (entry > ALARM_MAX_ENTRY)) {
 		return ALARM_RET_INVALID_PARAM;
+	}
+
+	if (alarms_list[entry].tid == ALARM_ENTRY_FREE) {
+		return ALARM_RET_SUCCESS;
 	}
 
 	/* Stop the thread. (TODO: ensure that the thread is not in middle of an mqueue operation). */

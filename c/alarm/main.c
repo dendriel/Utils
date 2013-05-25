@@ -1,5 +1,5 @@
 /*
- * Brief: Main program used to develop and test the alarm object.
+ * Brief: Main program used to develop and test the alarm module.
  * Author: vitor.rozsa
  * Contact: vitor.rozsa@hotmail.com
  * Date: 25/05/2013
@@ -22,10 +22,14 @@
 #define SUCCESS 0
 #define ERROR -1
 #define MS 1000
-#define MAX 100
+#define MAX 10
 #define MQUEUE_NAME "/test_queue"
+#define REPEAT_ALARM false
 
 
+/**
+ * \b Fill up alarm structure and launch the alarm.
+ */
 int launch_ala(int i, int *entry)
 {
 	st_alarm alarm;
@@ -36,7 +40,7 @@ int launch_ala(int i, int *entry)
 
 	alarm.wait_time = 50*MS;
 	alarm.wait_time = 1000*MS;
-	alarm.repeat = true;
+	alarm.repeat = REPEAT_ALARM;
 	alarm.priority = 0;
 	strncpy(alarm.dest_mqueue, MQUEUE_NAME, sizeof(alarm.dest_mqueue));
 
@@ -45,7 +49,7 @@ int launch_ala(int i, int *entry)
 		printf("Failed to malloc!");
 		return ERROR;
 	}
-	snprintf(str, 10, "vitor");
+	snprintf(str, 10, "vitor%d", i);
 	alarm.data = (void *)str;
 
 	ret = alarm_set_trigger(&alarm, entry);
@@ -75,18 +79,20 @@ int main(void)
 		printf("Alarm %d set.\n", i);
 	}
 
-	sleep(1);
+	sleep(2);
 
 	for (i=0; i < MAX; i++) {
-		ret = alarm_remove_trigger(entry[i]);
-		if (ret != ALARM_RET_SUCCESS) {
-			printf("Failed to remove the alarm. Error %d.\n", ret);
-			return ERROR;
+		if (REPEAT_ALARM) { // free only if the thread will not do itself.
+			ret = alarm_remove_trigger(entry[i]);
+			if (ret != ALARM_RET_SUCCESS) {
+				printf("Failed to remove the alarm. Error %d.\n", ret);
+				return ERROR;
+			}
+			printf("Alarm %d removed\n", i);
 		}
-		printf("Alarm %d removed\n", i);
 	}
 
-	sleep(3);
+	sleep(1);
 
 	/* Try re-using the past allocated positions. */
 	for (i=0; i < MAX; i++) {
@@ -100,12 +106,14 @@ int main(void)
 	sleep(1);
 
 	for (i=0; i < MAX; i++) {
-		ret = alarm_remove_trigger(entry[i]);
-		if (ret != ALARM_RET_SUCCESS) {
-			printf("Failed to remove the alarm. Error %d.\n", ret);
-			return ERROR;
+		if (REPEAT_ALARM) { // free only if the thread will not do itself.
+			ret = alarm_remove_trigger(entry[i]);
+			if (ret != ALARM_RET_SUCCESS) {
+				printf("Failed to remove the alarm. Error %d.\n", ret);
+				return ERROR;
+			}
+			printf("Alarm %d removed\n", i);
 		}
-		printf("Alarm %d removed\n", i);
 	}
 
 	return SUCCESS;
