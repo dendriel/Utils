@@ -9,7 +9,7 @@ DIR_TOP := .
 ENABLE_EFENCE := #ENABLED
 
 COMPILER := gcc
-CFLAGS := -Wall
+CFLAGS := -Wall -Werror
 
 TARGET := main
 SOURCE := main.c
