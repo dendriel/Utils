@@ -109,7 +109,7 @@ static en_alarm_ret_code alarm_send_message(st_alarm *alarm)
 		return ALARM_RET_ERROR;
 	}
 
-	ret = mq_send(dest_mq, alarm->data, sizeof(alarm->data)+1, alarm->priority);
+	ret = mq_send(dest_mq, alarm->data, alarm->data_size, alarm->priority);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to send message. errno: %d; msg: %s\n", errno, strerror(errno));
 		mq_close(dest_mq);

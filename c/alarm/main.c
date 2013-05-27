@@ -23,7 +23,7 @@
 #define ERROR -1
 #define MS 1000
 #define MAX 10
-#define MQUEUE_NAME "/test_queue"
+#define MQUEUE_NAME "/gameVideo_queue"
 #define REPEAT_ALARM false
 
 

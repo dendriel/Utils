@@ -21,6 +21,7 @@ typedef struct {
 	char dest_mqueue[NAME_MAX];		//!< Destination mqueue.
 	unsigned int priority;			//!< Mqueue priority of the message.
 	void *data;						//!< Storage pointer (used to inform an action or maintain some data).
+	size_t data_size;				//!< Storage the data size.
 } st_alarm;
 
 /**

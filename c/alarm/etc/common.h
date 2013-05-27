@@ -1,7 +1,7 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
-#define QUEUE_NAME  "/test_queue"
+#define QUEUE_NAME  "/gameVideo_queue"
 #define MAX_SIZE    1024
 #define MSG_STOP    "exit"
 
