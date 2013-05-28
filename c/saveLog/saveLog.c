@@ -1,9 +1,10 @@
-/*
- * Log function with variable number of args
- * vitor.rozsa
- * vitor.rozsa@hotmail.com
- * 09/01/2013
- */
+ /***************************************************************************************************
+ * Description: Log function with variable number of args.
+ * Author: vitor.rozsa
+ * Contact: vitor.rozsa@hotmail.com
+ * Creation date: 09/01/2013
+ * Note: You also can whant to see "Utils/c/debug/debug.h".
+ **************************************************************************************************/
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -16,7 +17,7 @@
 void save_log(char* logdest, const char *format, ...);
 
 /*
- * Brief: Main function. Save some data in the log file.
+ * \b Main function. Save some data in the log file.
  */
 int main(int args, char *argv[])
 {
@@ -42,23 +43,23 @@ void save_log(char* log_dest, const char *format, ...)
 		log_name = LOG_NAME;
 	}
 
-	// open or create log file.
+	/* Open or create log file. */
 	if((log_file = fopen(log_name, "a+")) == NULL) {
 		fprintf(STDERR, "Failed to open/create log file!\n");
 		return;
 	}
 
-	// start arg list
+	/* Starts the arg list. */
 	va_start(arg, format);
 
 	if(vfprintf(log_file, format, arg) < 0) {
 		fprintf(STDERR, "Failed to write in the file!\n");
 	}
 
-	// end arg list
+	/* Finish the arg list. */
 	va_end(arg);
 
-	// close file
+	/* Close file. */
 	fclose(log_file);
 
 	return;
