@@ -12,7 +12,7 @@ CFLAGS = -Wall -Werror -c
 TARGET = linked_list.o
 OBJS_MOD = 755
 
-SRCS = src/linked_list.c
+SRCS = linked_list.c
 
 INCLUDES = -I$(TOP)/inc
 

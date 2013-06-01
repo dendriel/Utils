@@ -6,10 +6,13 @@
  **************************************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "linked_list.h"
 #include "linked_listStructs.h"
 
+
+/*************************************************************************************************/
 
 int list_add_first(st_list *list, st_list_item *item)
 {
@@ -27,6 +30,8 @@ int list_add_first(st_list *list, st_list_item *item)
 	return 0;
 }
 
+/*************************************************************************************************/
+
 int list_add_next(st_list *list, st_list_item *item)
 {
 	if (!list || !item) {
@@ -42,6 +47,8 @@ int list_add_next(st_list *list, st_list_item *item)
 	return 0;
 }
 
+/*************************************************************************************************/
+
 st_list_item *list_get_first(st_list *mlist)
 {
 	if (!mlist) {
@@ -52,6 +59,8 @@ st_list_item *list_get_first(st_list *mlist)
 	}
 }
 
+/*************************************************************************************************/
+
 st_list_item *list_get_last(st_list *mlist)
 {
 	if (!mlist) {
@@ -61,6 +70,8 @@ st_list_item *list_get_last(st_list *mlist)
 		return mlist->last;
 	}
 }
+
+/*************************************************************************************************/
 
 st_list_item *list_get_item(st_list *mlist, unsigned int index)
 {
@@ -84,6 +95,8 @@ st_list_item *list_get_item(st_list *mlist, unsigned int index)
 
 	return NULL;
 }
+
+/*************************************************************************************************/
 
 void list_destroy(st_list **mlist)
 {
@@ -119,3 +132,16 @@ void list_destroy(st_list **mlist)
 	*mlist = NULL;
 }
 
+/*************************************************************************************************/
+
+int list_init(st_list **list)
+{
+	*list = (st_list *)malloc(sizeof(st_list));
+	if (*list == NULL) {
+		return -1;
+	}
+
+	memset(*list, 0, sizeof(st_list));
+
+	return 0;
+}
