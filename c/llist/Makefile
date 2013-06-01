@@ -4,7 +4,7 @@
 # date: 14/02/2013
 ##
 
-DIR_TOP := .
+TOP := .
 
 ENABLE_EFENCE := #ENABLED
 
@@ -14,9 +14,9 @@ CFLAGS := -Wall -Werror
 TARGET := main
 SOURCE := main.c
 
-INCLUDES :=  -I$(DIR_TOP)/lib/inc
+INCLUDES :=  -I$(TOP)/src/inc
 
-OBJ_ADD := $(DIR_TOP)/lib/linked_list.o
+OBJ_ADD := $(TOP)/src/llist.o
 
 LIB_DIR :=
 
@@ -30,8 +30,7 @@ $(TARGET): $(SOURCE) $(OBJ_ADD)
 	$(COMPILER) $(FLAGS) $(SOURCE) $(INCLUDES) $(OBJ_ADD) $(LIBS) -o $(TARGET) 
 	
 $(OBJ_ADD):
-	@cd $(DIR_TOP)/lib/ && make
-
+	@make -C $(TOP)/src
 
 .PHONY: clean
 clean:

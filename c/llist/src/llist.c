@@ -1,5 +1,5 @@
 /***************************************************************************************************
- * Description: Linked list library example - source code.
+ * Description: Linked list example - source code.
  * Author: vitor.rozsa
  * Contact: vitor.rozsa@hotmail.com
  * Creation date: 14/02/2013
@@ -8,16 +8,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "linked_list.h"
-#include "linked_listStructs.h"
+#include "llist.h"
+#include "llist_defines.h"
+#include "llist_structs.h"
 
 
 /*************************************************************************************************/
 
-int list_add_first(st_list *list, st_list_item *item)
+en_llist_ret_code llist_init(st_list **list)
+{
+	*list = (st_list *)malloc(sizeof(st_list));
+	if (*list == NULL) {
+		return LLIST_RET_ERROR;
+	}
+
+	memset(*list, 0, sizeof(st_list));
+
+	return LLIST_RET_SUCCESS;
+}
+
+/*************************************************************************************************/
+
+en_llist_ret_code llist_add_first(st_list *list, st_list_item *item)
 {
 	if (!list || !item) {
-		return -1;
+		return LLIST_RET_ERROR;
 	}
 
 	item->next = NULL;
@@ -27,29 +42,35 @@ int list_add_first(st_list *list, st_list_item *item)
 	list->last = item;
 	list->item_counter = 1;
 
-	return 0;
+	return LLIST_RET_SUCCESS;
 }
 
 /*************************************************************************************************/
 
-int list_add_next(st_list *list, st_list_item *item)
+en_llist_ret_code llist_add_next(st_list *list, st_list_item *item)
 {
 	if (!list || !item) {
-		return -1;
+		return LLIST_RET_ERROR;
 	}
+
+/*	printf("\nlast: %p; last->next: %p\nfirst: %p; first->next: %p",
+		 list->last, list->last->next, list->first, list->first->next);*/
 
 	list->last->next = item;
 	list->last = item;
 	item->index = list->item_counter;
 
+/*	printf("\nlast: %p; last->next: %p\nfirst: %p; first->next: %p",
+		 list->last, list->last->next, list->first, list->first->next);*/
+
 	list->item_counter++;
 
-	return 0;
+	return LLIST_RET_SUCCESS;
 }
 
 /*************************************************************************************************/
 
-st_list_item *list_get_first(st_list *mlist)
+st_list_item *llist_get_first(st_list *mlist)
 {
 	if (!mlist) {
 		return NULL;
@@ -61,7 +82,7 @@ st_list_item *list_get_first(st_list *mlist)
 
 /*************************************************************************************************/
 
-st_list_item *list_get_last(st_list *mlist)
+st_list_item *llist_get_last(st_list *mlist)
 {
 	if (!mlist) {
 		return NULL;
@@ -73,7 +94,7 @@ st_list_item *list_get_last(st_list *mlist)
 
 /*************************************************************************************************/
 
-st_list_item *list_get_item(st_list *mlist, unsigned int index)
+st_list_item *llist_get_item(st_list *mlist, unsigned int index)
 {
 	st_list_item *item = NULL;
 
@@ -98,7 +119,7 @@ st_list_item *list_get_item(st_list *mlist, unsigned int index)
 
 /*************************************************************************************************/
 
-void list_destroy(st_list **mlist)
+void llist_destroy(st_list **mlist)
 {
 	st_list_item *cur = NULL;
 	st_list_item *after = NULL;
@@ -132,16 +153,3 @@ void list_destroy(st_list **mlist)
 	*mlist = NULL;
 }
 
-/*************************************************************************************************/
-
-int list_init(st_list **list)
-{
-	*list = (st_list *)malloc(sizeof(st_list));
-	if (*list == NULL) {
-		return -1;
-	}
-
-	memset(*list, 0, sizeof(st_list));
-
-	return 0;
-}

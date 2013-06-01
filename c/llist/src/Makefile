@@ -9,10 +9,10 @@ TOP = .
 CC = gcc
 CFLAGS = -Wall -Werror -c
 
-TARGET = linked_list.o
+TARGET = llist.o
 OBJS_MOD = 755
 
-SRCS = linked_list.c
+SRCS = llist.c
 
 INCLUDES = -I$(TOP)/inc
 

@@ -1,5 +1,5 @@
 /*
- * brief: main program used to develop and test the linked_list library
+ * brief: main program used to develop and test the linked_list.
  * author: vitor.rozsa
  * date: 14/02/2013
  */
@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "linked_list.h"
+#include "llist.h"
 
 
 typedef struct {
@@ -37,34 +37,34 @@ int main(int argc, char *argv[])
 	list_dump(myList);
 
 	// prints the first item from the list
-	item = list_get_first(myList);
+	item = llist_get_first(myList);
 	if (!item) {
 		fprintf(stderr, "Failed to retrieve an item from the list");
-		list_destroy(&myList);
+		llist_destroy(&myList);
 		return -1;
 	}
 	list_dump_item(item);
 
 	// prints the last item from the list
-	item = list_get_last(myList);
+	item = llist_get_last(myList);
 	if (!item) {
 		fprintf(stderr, "Failed to retrieve an item from the list");
-		list_destroy(&myList);
+		llist_destroy(&myList);
 		return -1;
 	}
 	list_dump_item(item);
 
 	// get an item at the middle of the list
-	item = list_get_item(myList, 4);
+	item = llist_get_item(myList, 4);
 	if (!item) {
 		fprintf(stderr, "Failed to retrieve an item from the list");
-		list_destroy(&myList);
+		llist_destroy(&myList);
 		return -1;
 	}
 	list_dump_item(item);
 
 	// free the list elements and erase the reference
-	list_destroy(&myList);
+	llist_destroy(&myList);
 
 	return 0;
 }
@@ -87,14 +87,14 @@ st_list *test(void)
 
 	myFirstItem = (st_list_item *)malloc(sizeof(st_list_item));
 	if (!myFirstItem) {
-		list_destroy(&myList);
+		llist_destroy(&myList);
 		fprintf(stderr, "test() - malloc for myFirstItem failed!!\n");
 		return NULL;
 	}
 
 	data = (myStruct *)malloc(sizeof(myStruct));
 	if (!data) {
-		list_destroy(&myList);
+		llist_destroy(&myList);
 		free(myFirstItem);
 		fprintf(stderr, "test() - malloc for data failed!!\n");
 		return NULL;
@@ -108,7 +108,7 @@ st_list *test(void)
 
 	myFirstItem->data = data;
 
-	list_add_first(myList, myFirstItem);
+	llist_add_first(myList, myFirstItem);
 
 	// fill the list
 	feed_list(10, myList);
@@ -153,7 +153,7 @@ static void feed_list(int qnt, st_list *list)
 
 		listItem->data = data;
 
-		list_add_next(list, listItem);
+		llist_add_next(list, listItem);
 
 		listItem = NULL;
 	}

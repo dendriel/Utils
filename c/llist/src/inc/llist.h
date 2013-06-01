@@ -1,13 +1,14 @@
 /***************************************************************************************************
- * Description: linked list library example - prototype of the functions.
+ * Description: linked list example - prototype of the functions.
  * Author: vitor.rozsa
  * Contact: vitor.rozsa@hotmail.com
  * Creation date: 14/02/2013
  **************************************************************************************************/
-#ifndef LINKED_LIST_HEADER
-#define LINKED_LIST_HEADER
+#ifndef LLIST_HEADER
+#define LLIST_HEADER
 
-#include "linked_listStructs.h"
+#include "llist_defines.h"
+#include "llist_structs.h"
 
 
 /*************************************************************************************************/
@@ -17,7 +18,7 @@
  *	\p item The element to insert into the list.
  *	\r 0 for success; -1 for error (only for invalid parameters).
  */
-int list_add_first(st_list *list, st_list_item *item);
+en_llist_ret_code llist_add_first(st_list *list, st_list_item *item);
 
 /*************************************************************************************************/
 /**
@@ -26,7 +27,7 @@ int list_add_first(st_list *list, st_list_item *item);
  *	\p item The element to insert into the list.
  *	\r 0 for success; -1 for error (only for invalid parameters).
  */
-int list_add_next(st_list *list, st_list_item *item);
+en_llist_ret_code llist_add_next(st_list *list, st_list_item *item);
 
 /*************************************************************************************************/
 /**
@@ -34,7 +35,7 @@ int list_add_next(st_list *list, st_list_item *item);
  *	\p mlist The list to retrieve the element from.
  *	\r Will return a pointer for the first item or NULL if there is not element in the list.
  */
-st_list_item *list_get_first(st_list *mlist);
+st_list_item *llist_get_first(st_list *mlist);
 
 /*************************************************************************************************/
 /**
@@ -42,7 +43,7 @@ st_list_item *list_get_first(st_list *mlist);
  *	\p mlist The list to retrieve the element from.
  *	\r Will return a pointer for the last item or NULL if there is not element in the list.
  */
-st_list_item *list_get_last(st_list *mlist);
+st_list_item *llist_get_last(st_list *mlist);
 
 /*************************************************************************************************/
 /**
@@ -52,20 +53,20 @@ st_list_item *list_get_last(st_list *mlist);
  *	\n The way that the list is being iterated is very ugly. But
  *	this library should be used just for study purpose.
  */
-st_list_item *list_get_item(st_list *mlist, unsigned int index);
+st_list_item *llist_get_item(st_list *mlist, unsigned int index);
 
 /*************************************************************************************************/
 /**
  *	\b Destroys the list and all his members.
  *	\p list The list itself to be freed.
  */
-void list_destroy(st_list **list);
+void llist_destroy(st_list **list);
 
 /*************************************************************************************************/
 /**
  *	\b Allocate memory to the linked list.
  *	\r 0 for successfully operation; -1 if could not allocate memoryf for the list.
  */
-int list_init(st_list **mlist);
+en_llist_ret_code llist_init(st_list **mlist);
 
-#endif /* LINKED_LIST_HEADER */
+#endif /* LLIST_HEADER */
