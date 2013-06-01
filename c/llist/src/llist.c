@@ -128,6 +128,7 @@ void llist_destroy(st_list **mlist)
 	if((*mlist)->item_counter == 0) {
 		free(*mlist);
 		*mlist = NULL;
+		return;
 	}
 
 	st_list_item *cur = NULL;
