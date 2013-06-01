@@ -121,35 +121,26 @@ st_list_item *llist_get_item(st_list *mlist, unsigned int index)
 
 void llist_destroy(st_list **mlist)
 {
-	st_list_item *cur = NULL;
-	st_list_item *after = NULL;
-
-	if (*mlist == NULL) {
+	if(mlist == NULL) {
 		return;
 	}
 
-   if ((*mlist)->first == NULL) {
+	if((*mlist)->item_counter == 0) {
 		free(*mlist);
 		*mlist = NULL;
 	}
 
-	after = (*mlist)->first->next;
+	st_list_item *cur = NULL;
+	st_list_item *after = NULL;
 
-	if ((*mlist)->first->data != NULL) {
-		free((*mlist)->first->data);
-	}
-	free((*mlist)->first);
+	cur = (*mlist)->first;
+	after = cur->next;
 
-	while(after) {
-		cur = after;
-		after = cur->next;
-		if (cur->data != NULL) {
-			free(cur->data);
-		}
+	while (cur) {
+		free(cur->data);
 		free(cur);
+		cur = after;
+		after = (cur != NULL)? cur->next : NULL;
 	}
-
-	free(*mlist);
-	*mlist = NULL;
 }
 
