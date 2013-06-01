@@ -12,6 +12,7 @@
 
 typedef struct {
 	char name[32];
+	char *l;
 	int counter;
 } myStruct;
 
@@ -44,6 +45,9 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	list_dump_item(item);
+
+	myStruct *mst = (myStruct *) item->data;
+	free(mst->l);
 
 	// prints the last item from the list
 	item = llist_get_last(myList);
@@ -105,6 +109,10 @@ st_list *test(void)
 
 	strncpy(data->name, "first item!", sizeof(data->name));
 	data->counter = 0;
+	data->l = (char *)malloc(sizeof(char) * 5);
+	if (data->l == NULL) {
+		printf("Failed to malloc data to data->l.\n");
+	}
 
 	myFirstItem->data = data;
 

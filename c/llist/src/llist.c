@@ -128,17 +128,17 @@ void llist_destroy(st_list **mlist)
 		return;
 	}
 
-   if ((**mlist).first == NULL) {
+   if ((*mlist)->first == NULL) {
 		free(*mlist);
 		*mlist = NULL;
 	}
 
-	after = (**mlist).first->next;
+	after = (*mlist)->first->next;
 
-	if ((**mlist).first->data != NULL) {
-		free((**mlist).first->data);
+	if ((*mlist)->first->data != NULL) {
+		free((*mlist)->first->data);
 	}
-	free((**mlist).first);
+	free((*mlist)->first);
 
 	while(after) {
 		cur = after;
