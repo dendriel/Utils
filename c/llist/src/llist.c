@@ -36,6 +36,7 @@ en_llist_ret_code llist_add_first(st_list *list, st_list_item *item)
 	}
 
 	item->next = NULL;
+	item->prev = NULL;
 	item->index = 0;
 
 	list->first = item;
@@ -53,11 +54,20 @@ en_llist_ret_code llist_add_next(st_list *list, st_list_item *item)
 		return LLIST_RET_ERROR;
 	}
 
+	st_list_item *prev = NULL;
+
 /*	printf("\nlast: %p; last->next: %p\nfirst: %p; first->next: %p",
 		 list->last, list->last->next, list->first, list->first->next);*/
 
+	/* Save [current last item], that will be the previous of the new last. */
+	prev = list->last;
+	/* Save the [new item] as [next item] of the [current last item]. */
 	list->last->next = item;
+	/* Save the [new item] as [last item]. */
 	list->last = item;
+	/* Save the [old last item] as previous of the [new last item]. */
+	list->last->prev = prev;
+	/* Save item counter as index reference for the new item. */
 	item->index = list->item_counter;
 
 /*	printf("\nlast: %p; last->next: %p\nfirst: %p; first->next: %p",
@@ -70,43 +80,79 @@ en_llist_ret_code llist_add_next(st_list *list, st_list_item *item)
 
 /*************************************************************************************************/
 
-st_list_item *llist_get_first(st_list *mlist)
+en_llist_ret_code llist_rm_index(st_list *list, const unsigned int index)
 {
-	if (!mlist) {
+	st_list_item *item = NULL;
+	st_list_item *item_next = NULL;
+	st_list_item *item_prev = NULL;
+
+	item = llist_get_item(list, index);
+	if (item == NULL) {
+		return LLIST_RET_NOTFOUND;
+	}
+
+	item_next = item->next;
+	item_prev = item->prev;
+
+	/* Remove first item. A<->B<->C => B<->C */
+	if (item == list->first) {
+		item_next->prev = NULL;
+		list->first = item_next;
+	}
+	/* Remove last item. A<->B<->C => A<->B */
+	else if (item == list->last) {
+		item_prev->next = NULL;
+		list->last = item_prev;
+	}
+	/* Remove middle item. A<->B<->C => A<->C */
+	else {
+		item_prev->next = item_next;
+		item_next->prev = item_prev;
+	}
+
+	list->item_counter--;
+
+	free(item->data);
+	free(item);
+
+	return LLIST_RET_SUCCESS;
+}
+
+/*************************************************************************************************/
+
+st_list_item *llist_get_first(st_list *list)
+{
+	if (!list) {
 		return NULL;
 	}
 	else {
-		return mlist->first;
+		return list->first;
 	}
 }
 
 /*************************************************************************************************/
 
-st_list_item *llist_get_last(st_list *mlist)
+st_list_item *llist_get_last(st_list *list)
 {
-	if (!mlist) {
+	if (!list) {
 		return NULL;
 	}
 	else {
-		return mlist->last;
+		return list->last;
 	}
 }
 
 /*************************************************************************************************/
 
-st_list_item *llist_get_item(st_list *mlist, unsigned int index)
+st_list_item *llist_get_item(st_list *list, unsigned int index)
 {
 	st_list_item *item = NULL;
 
-	if ( (!mlist) || (index > mlist->item_counter)) {
+	if (!list) {
 		return NULL;
 	}
 
-	if (index == (mlist->item_counter - 1)) {
-		return mlist->last;
-	}
-
-	item = mlist->first;
+	item = list->first;
 	while (item) {
 		if (item->index == index) {
 			return item;
@@ -119,24 +165,23 @@ st_list_item *llist_get_item(st_list *mlist, unsigned int index)
 
 /*************************************************************************************************/
 
-void llist_destroy(st_list **mlist)
+void llist_free_items(st_list **list)
 {
-	if(mlist == NULL) {
+	if(list == NULL) {
 		return;
 	}
 
-	if((*mlist)->item_counter == 0) {
-		free(*mlist);
-		*mlist = NULL;
+	if((*list)->item_counter == 0) {
+		free(*list);
+		*list = NULL;
 		return;
 	}
 
 	st_list_item *cur = NULL;
 	st_list_item *after = NULL;
 
-	cur = (*mlist)->first;
+	cur = (*list)->first;
 	after = cur->next;
-
 	while (cur) {
 		free(cur->data);
 		free(cur);
@@ -144,4 +189,14 @@ void llist_destroy(st_list **mlist)
 		after = (cur != NULL)? cur->next : NULL;
 	}
 }
+
+/*************************************************************************************************/
+
+void llist_destroy(st_list **list)
+{
+	llist_free_items(list);
+	free(*list);
+	*list = NULL;
+}
+
 

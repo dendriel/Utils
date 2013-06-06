@@ -12,8 +12,9 @@
  */
 typedef struct {
 	void *data;
-	int index;
+	unsigned int index;
 	void *next;
+	void *prev;
 } st_list_item;
 
 /**
@@ -22,7 +23,7 @@ typedef struct {
 typedef struct {
 	st_list_item *first;
 	st_list_item *last;
-	int item_counter;
+	unsigned int item_counter;
 } st_list;
 
 #endif /* LINKED_LIST_STRUCTS_HEADER */

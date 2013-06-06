@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 {
 	st_list *myList = NULL;
 	st_list_item *item = NULL;
+	en_llist_ret_code ret;
 
 	myList = test();
 
@@ -66,6 +67,46 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	list_dump_item(item);
+
+	// Remove test.
+	printf("\nWill remove some items of the list!!\n");
+	// First.
+	ret = llist_rm_index(myList, 0);
+	if (ret != LLIST_RET_SUCCESS) {
+		fprintf(stderr, "Failed to remove first item.\n");
+	}
+
+	// Middle.
+	ret = llist_rm_index(myList, 5);
+	if (ret != LLIST_RET_SUCCESS) {
+		fprintf(stderr, "Failed to remove middle item.\n");
+	}
+
+	// last.
+	item = llist_get_last(myList);
+	if (!item) {
+		fprintf(stderr, "Failed to retrieve an item from the list");
+		llist_destroy(&myList);
+		return -1;
+	}
+	mst = (myStruct *) item->data;
+	free(mst->l);
+
+	ret = llist_rm_index(myList, item->index);
+	if (ret != LLIST_RET_SUCCESS) {
+		fprintf(stderr, "Failed to remove last item.\n");
+	}
+
+	list_dump(myList);
+
+	// try to remove an invalid item.
+	ret = llist_rm_index(myList, 9);
+	if (ret == LLIST_RET_NOTFOUND) {
+		fprintf(stderr, "[expected] Failed to remove last item. Item not found!\n");
+	}
+	else if (ret != LLIST_RET_SUCCESS) {
+		fprintf(stderr, "Something went wrong while trying to remove last item.\n");
+	}
 
 	// free the list elements and erase the reference
 	llist_destroy(&myList);
@@ -196,7 +237,7 @@ static void list_dump_item(st_list_item *listItem)
 
 	if (listItem->data != NULL) {
 		data = (myStruct *)listItem->data;
-		printf("counter: %d\nname: %s\n\n", data->counter, data->name);
+		printf("\ncounter: %d\nname: %s\n\n", data->counter, data->name);
 	}
 }
 
