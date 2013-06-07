@@ -35,13 +35,16 @@ en_llist_ret_code llist_add_first(st_list *list, st_list_item *item)
 		return LLIST_RET_ERROR;
 	}
 
+	list->item_index = 0;
+
 	item->next = NULL;
 	item->prev = NULL;
-	item->index = 0;
+	item->index = list->item_index;
 
 	list->first = item;
 	list->last = item;
 	list->item_counter = 1;
+	list->item_index++;
 
 	return LLIST_RET_SUCCESS;
 }
@@ -67,13 +70,16 @@ en_llist_ret_code llist_add_next(st_list *list, st_list_item *item)
 	list->last = item;
 	/* Save the [old last item] as previous of the [new last item]. */
 	list->last->prev = prev;
+	/* Clean the "next" item for the last element so we can use this value as control. */
+	list->last->next = NULL;
 	/* Save item counter as index reference for the new item. */
-	item->index = list->item_counter;
+	item->index = list->item_index;
 
 /*	printf("\nlast: %p; last->next: %p\nfirst: %p; first->next: %p",
 		 list->last, list->last->next, list->first, list->first->next);*/
 
 	list->item_counter++;
+	list->item_index++;
 
 	return LLIST_RET_SUCCESS;
 }
@@ -198,5 +204,4 @@ void llist_destroy(st_list **list)
 	free(*list);
 	*list = NULL;
 }
-
 
