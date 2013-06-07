@@ -24,6 +24,7 @@ typedef struct {
 	st_list_item *first;
 	st_list_item *last;
 	unsigned int item_counter;
+	unsigned int item_index;
 } st_list;
 
 #endif /* LINKED_LIST_STRUCTS_HEADER */
