@@ -20,6 +20,7 @@ st_list *test(void);
 static void feed_list(int qnt, st_list *list);
 static void list_dump_item(st_list_item *listItem);
 static void list_dump(st_list *mlist);
+static void list_dump2(st_list *mlist);
 
 
 int main(int argc, char *argv[])
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
 
 	// prints all elements from the list
 	list_dump(myList);
+	list_dump2(myList);
 
 	// prints the first item from the list
 	item = llist_get_first(myList);
@@ -98,6 +100,7 @@ int main(int argc, char *argv[])
 	}
 
 	list_dump(myList);
+	list_dump2(myList);
 
 	// try to remove an invalid item.
 	ret = llist_rm_index(myList, 9);
@@ -239,5 +242,21 @@ static void list_dump_item(st_list_item *listItem)
 		data = (myStruct *)listItem->data;
 		printf("\ncounter: %d\nname: %s\n\n", data->counter, data->name);
 	}
+}
+
+/*
+ * brief Test llist_get_next() function
+ */
+static void list_dump2(st_list *mlist)
+{
+	unsigned int index = 0;
+	st_list_item *item = NULL;
+
+	printf("Will dump2 the list!\n");
+
+	while ((item = llist_get_next(mlist, &index)) != NULL) {
+		printf("INDEX: %d\n", index);
+		list_dump_item(item);
+	};
 }
 

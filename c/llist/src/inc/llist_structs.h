@@ -10,11 +10,11 @@
 /**
  *	\b Generic item structure.
  */
-typedef struct {
+typedef struct st_list_item {
 	void *data;
 	unsigned int index;
-	void *next;
-	void *prev;
+	struct st_list_item *next;
+	struct st_list_item *prev;
 } st_list_item;
 
 /**

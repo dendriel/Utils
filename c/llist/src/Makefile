@@ -12,13 +12,14 @@ CFLAGS = -Wall -Werror -c
 TARGET = llist.o
 OBJS_MOD = 755
 
+INC = $(wildcard ./inc/*.h)
 SRCS = llist.c
 
 INCLUDES = -I$(TOP)/inc
 
 
 
-$(TARGET): $(SRCS)
+$(TARGET): $(SRCS) $(INC)
 	@echo "> Will create the objects: $(TARGET)"
 	$(CC) $(CFLAGS) $(SRCS) $(INCLUDES)
 	@chmod $(OBJS_MOD) $(TARGET)

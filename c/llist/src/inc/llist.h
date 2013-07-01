@@ -43,35 +43,46 @@ en_llist_ret_code llist_rm_index(st_list *list, const unsigned int index);
 /*************************************************************************************************/
 /**
  *	\b Retrieve the first item from the list.
- *	\p mlist The list to retrieve the element from.
+ *	\p list The list to retrieve the element from.
  *	\r Will return a pointer for the first item or NULL if there is not element in the list.
  */
-st_list_item *llist_get_first(st_list *mlist);
+st_list_item *llist_get_first(st_list *list);
 
 /*************************************************************************************************/
 /**
  *	\b Retrieve the last item from the list.
- *	\p mlist The list to retrieve the element from.
+ *	\p list The list to retrieve the element from.
  *	\r Will return a pointer for the last item or NULL if there is not element in the list.
  */
-st_list_item *llist_get_last(st_list *mlist);
+st_list_item *llist_get_last(st_list *list);
+
+/*************************************************************************************************/
+/**
+ *	\b Get the item pointed by index and auto-increment it.
+ *	\p list The list that will be iteracted.
+ *	\p index If passed with 0 in the first call, will get the first item from the list and save the
+ *	index from the next item. If there is no itens anymore, will fill index with -1 value.
+ *	\r Return the current item, pointed by index, or NULL if the index was filled with the ending
+ *	flag (-1).
+ */
+st_list_item *llist_get_next(st_list *list, unsigned int *index);
 
 /*************************************************************************************************/
 /**
  *	\b Returns the item specified by index
- *	\p mlist The list to retrieve the element from.
+ *	\p list The list to retrieve the element from.
  *	\p index The reference for the item inside the list.
  *	\n The way that the list is being iterated is very ugly. But
  *	this library should be used just for study purpose.
  */
-st_list_item *llist_get_item(st_list *mlist, unsigned int index);
+st_list_item *llist_get_item(st_list *list, unsigned int index);
 
 /*************************************************************************************************/
 /**
  *	\b Allocate memory to the linked list.
  *	\r 0 for successfully operation; -1 if could not allocate memoryf for the list.
  */
-en_llist_ret_code llist_init(st_list **mlist);
+en_llist_ret_code llist_init(st_list **list);
 
 /*************************************************************************************************/
 /**
