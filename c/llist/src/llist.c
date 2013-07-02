@@ -150,44 +150,6 @@ st_list_item *llist_get_last(st_list *list)
 
 /*************************************************************************************************/
 
-st_list_item *llist_get_next(st_list *list, unsigned int *index)
-{
-	if (!list && !index) {
-		return NULL;
-	}
-
-	st_list_item *item = NULL;
-
-	/* List already ended. */
-	if (*index == -1) {
-		return NULL;
-	}
-
-	/* If want to start by the first item. */
-	if (*index == 0) {
-		item = list->first;
-	}
-	else {
-		item = llist_get_item(list, *index);
-	}
-
-	if (item == NULL) {
-		return NULL;
-	}
-
-	/* Save reference to iteract later if needed. */
-	if (item->next == NULL) {
-		*index = -1; // I can't do that =[
-	}
-	else {
-		*index = item->next->index;
-	}
-
-	return item;
-}
-
-/*************************************************************************************************/
-
 st_list_item *llist_get_item(st_list *list, unsigned int index)
 {
 	if (!list) {

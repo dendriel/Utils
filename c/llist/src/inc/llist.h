@@ -58,17 +58,6 @@ st_list_item *llist_get_last(st_list *list);
 
 /*************************************************************************************************/
 /**
- *	\b Get the item pointed by index and auto-increment it.
- *	\p list The list that will be iteracted.
- *	\p index If passed with 0 in the first call, will get the first item from the list and save the
- *	index from the next item. If there is no itens anymore, will fill index with -1 value.
- *	\r Return the current item, pointed by index, or NULL if the index was filled with the ending
- *	flag (-1).
- */
-st_list_item *llist_get_next(st_list *list, unsigned int *index);
-
-/*************************************************************************************************/
-/**
  *	\b Returns the item specified by index
  *	\p list The list to retrieve the element from.
  *	\p index The reference for the item inside the list.
