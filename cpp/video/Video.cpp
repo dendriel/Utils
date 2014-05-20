@@ -7,6 +7,8 @@
 /*************************************************************************************************/
 
 Video::Video(const unsigned int& screen_width, const unsigned int& screen_height, const string& title, const unsigned int& update_interval):
+m_RealVideo(NULL),
+m_ScreenMode(VIDEO_REAL_SCREEN),
 m_ScreeWidth(screen_width),
 m_ScreeHeight(screen_height),
 m_UpdateInterval_ms(update_interval),
@@ -20,6 +22,51 @@ m_Title(title)
 	}
 
 	SDL_WM_SetCaption(m_Title.c_str(), NULL);
+
+	m_UpdateScreen_f_lock = SDL_CreateMutex();
+	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
+	cout << "Thread launched!! " << m_Updater_tid << endl;
+}
+
+/*************************************************************************************************/
+/* SDL interprets each pixel as a 32-bit number, so our masks must depend
+ * on the endianness (byte order) of the machine.
+ */
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define rmask 0xff000000
+#define gmask 0x00ff0000
+#define bmask 0x0000ff00
+#define amask 0x000000ff
+#else
+#define rmask 0x000000ff
+#define gmask 0x0000ff00
+#define bmask 0x00ff0000
+#define amask 0xff000000
+#endif
+
+Video::Video(st_virtual_screen is_virtual, Video *real_screen, const unsigned int& screen_width, const unsigned int& screen_height, const unsigned int& update_interval):
+m_RealVideo(real_screen),
+m_ScreenMode(VIDEO_VIRTUAL_SCREEN),
+m_ScreeWidth(screen_width),
+m_ScreeHeight(screen_height),
+m_UpdateInterval_ms(update_interval),
+m_UpdateScreen_f(false),
+m_Title("")
+{
+	assert(real_screen);
+
+	if (is_virtual != VIDEO_VIRTUAL_SCREEN) {
+		cout << "Invalid parameter for virtual screen initialization. First parameter must be \"VIDEO_VIRTUAL_SCREEN\"" << endl;
+		assert(0);
+	}
+
+	/* Create layer surface.*/
+	m_Screen = SDL_CreateRGBSurface(SDL_SWSURFACE, screen_width, screen_height, 32, rmask, gmask, bmask, amask);
+	if(m_Screen == NULL) {
+		cout << "Failed to set SDL Video Mode." << endl;
+	}
+
+	real_screen->push_under_layer(m_Screen);
 
 	m_UpdateScreen_f_lock = SDL_CreateMutex();
 	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
@@ -135,7 +182,9 @@ int Video::video_thread(void)
 		if (get_updateScreen() == true) {
 			draw_underLayer();
 			draw_visualElements();
-			SDL_Flip(m_Screen);
+			if (m_ScreenMode != VIDEO_VIRTUAL_SCREEN) {
+				SDL_Flip(m_Screen);
+			}
 		}
 
 		usleep(m_UpdateInterval_ms*1000);

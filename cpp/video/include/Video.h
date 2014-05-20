@@ -18,11 +18,18 @@ using namespace std;
 #define VIDEO_SCREEN_TITLE (string)"My Game"
 #define UNDERLAYER_MAX_SIZE 5
 
+typedef enum st_virtual_screen {
+	VIDEO_REAL_SCREEN = 0,
+	VIDEO_VIRTUAL_SCREEN = 1
+} st_screen_mode;
+
 class Video {
 private:
 	vector <VisualElement *> m_VisualElement_list;
 	vector <SDL_Surface *> m_UnderLayer_list;
 	SDL_Surface *m_Screen;		//!< Represents the monitor screen.
+	Video *m_RealVideo;		//!< Represents the real monitor screen when initialized as virtual screen.
+	st_screen_mode m_ScreenMode;//!< Tells if the screen is "real" or "virtual" (read the constructors for more info).
 	int m_ScreeWidth;			//!< Screen width in pixels.
 	int m_ScreeHeight;			//!< Screen height in pixels.
 	int m_UpdateInterval_ms;	//!< Update interval in mili seconds.
@@ -35,11 +42,21 @@ private:
 public:
 
 	/*
-	 * \brief Class constructor.
+	 * \brief Class constructor for real screen. Real screen will be the SDL screen representation.
 	 */
 	Video(const unsigned int& screen_width = VIDEO_SCREEN_WIDTH,
 			const unsigned int& screen_height = VIDEO_SCREEN_HEIGHT,
 			const string& title=VIDEO_SCREEN_TITLE,
+			const unsigned int& update_interval = SCREEN_UPDATE_DEFAULT_TIME_MS);
+
+	/*
+	 * \brief Class constructor for a virtual screen. Virtual screen will be the concept given to surfaces
+	 * that will be drawn inside the real screen and will represent sub-screens.
+	 */
+	Video(st_virtual_screen is_virtual,
+			Video *real_screen,
+			const unsigned int& screen_width = VIDEO_SCREEN_WIDTH,
+			const unsigned int& screen_height = VIDEO_SCREEN_HEIGHT,
 			const unsigned int& update_interval = SCREEN_UPDATE_DEFAULT_TIME_MS);
 
 	/*
