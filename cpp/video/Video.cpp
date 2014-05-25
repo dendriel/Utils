@@ -1,83 +1,57 @@
 #include "Video.h"
+
 #include <iostream>
+#include <algorithm>
 #include <assert.h>
 #include <unistd.h>
 #include <pthread.h>
 
+#include "Viewpoints.h"
+
+unsigned int Video::s_Video_ids;
+
 /*************************************************************************************************/
 
 Video::Video(const unsigned int& screen_width, const unsigned int& screen_height, const string& title, const unsigned int& update_interval):
-m_RealVideo(NULL),
-m_ScreenMode(VIDEO_REAL_SCREEN),
-m_ScreeWidth(screen_width),
-m_ScreeHeight(screen_height),
 m_UpdateInterval_ms(update_interval),
+m_Id(Video::generate_id()),
 m_UpdateScreen_f(false),
-m_Title(title)
+m_KeepRunning(true)
 {
-	m_Screen = SDL_SetVideoMode(screen_width, screen_height, VIDEO_SCREEN_BPP,
-			VIDEO_SCREEN_FLAGS);
+	cout << "CREATED Video [" << m_Id << "]" << endl;
+
+	m_Screen = SDL_SetVideoMode(screen_width, screen_height, VIDEO_SCREEN_BPP, VIDEO_SCREEN_FLAGS);
 	if(m_Screen == NULL) {
 		cout << "Failed to set SDL Video Mode." << endl;
 	}
 
-	SDL_WM_SetCaption(m_Title.c_str(), NULL);
+	SDL_WM_SetCaption(title.c_str(), NULL);
 
 	m_UpdateScreen_f_lock = SDL_CreateMutex();
+	m_VisualElement_list_lock = SDL_CreateMutex();
+	m_UnderLayer_list_lock = SDL_CreateMutex();
 	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
-	cout << "Thread launched!! " << m_Updater_tid << endl;
 }
 
-/*************************************************************************************************/
-/* SDL interprets each pixel as a 32-bit number, so our masks must depend
- * on the endianness (byte order) of the machine.
- */
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-#define rmask 0xff000000
-#define gmask 0x00ff0000
-#define bmask 0x0000ff00
-#define amask 0x000000ff
-#else
-#define rmask 0x000000ff
-#define gmask 0x0000ff00
-#define bmask 0x00ff0000
-#define amask 0xff000000
-#endif
-
-Video::Video(st_virtual_screen is_virtual, Video *real_screen, const unsigned int& screen_width, const unsigned int& screen_height, const unsigned int& update_interval):
-m_RealVideo(real_screen),
-m_ScreenMode(VIDEO_VIRTUAL_SCREEN),
-m_ScreeWidth(screen_width),
-m_ScreeHeight(screen_height),
-m_UpdateInterval_ms(update_interval),
-m_UpdateScreen_f(false),
-m_Title("")
-{
-	assert(real_screen);
-
-	if (is_virtual != VIDEO_VIRTUAL_SCREEN) {
-		cout << "Invalid parameter for virtual screen initialization. First parameter must be \"VIDEO_VIRTUAL_SCREEN\"" << endl;
-		assert(0);
-	}
-
-	/* Create layer surface.*/
-	m_Screen = SDL_CreateRGBSurface(SDL_SWSURFACE, screen_width, screen_height, 32, rmask, gmask, bmask, amask);
-	if(m_Screen == NULL) {
-		cout << "Failed to set SDL Video Mode." << endl;
-	}
-
-	real_screen->push_under_layer(m_Screen);
-
-	m_UpdateScreen_f_lock = SDL_CreateMutex();
-	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
-	cout << "Thread launched!! " << m_Updater_tid << endl;
-}
 
 /*************************************************************************************************/
 Video::~Video()
 {
+	set_updateScreen(false);
+
+	/* Signal to update screen thread to exit. */
+	int ret = 0;
+	m_KeepRunning = false;
+	SDL_WaitThread(m_Updater_tid, &ret);
+
+	/* Clear but not delete. */
+	m_VisualElement_list.clear();
+	m_UnderLayer_list.clear();
+
 	SDL_DestroyMutex(m_UpdateScreen_f_lock);
-	cout << "Video destroyed." << endl;
+	SDL_DestroyMutex(m_VisualElement_list_lock);
+	SDL_DestroyMutex(m_UnderLayer_list_lock);
+	cout << "REMOVED Video [" << m_Id << "] Thread ret(" << ret << ")" << endl;
 }
 
 
@@ -85,36 +59,83 @@ Video::~Video()
 void Video::add_visualElement(VisualElement *element)
 {
 	assert(element != NULL);
+
+	SDL_LockMutex(m_VisualElement_list_lock);
 	m_VisualElement_list.push_back(element);
+	SDL_UnlockMutex(m_VisualElement_list_lock);
+
+	cout << "[" << get_Id() << "]" << " Video - New VisualElement (" << element->get_Id() << ")" << endl;
+
 }
 
 /*************************************************************************************************/
-int Video::push_under_layer(SDL_Surface *layer)
+void Video::rem_visualElement_gen(VisualElement *element)
+{
+	SDL_LockMutex(m_VisualElement_list_lock);
+	m_VisualElement_list.erase(std::remove(m_VisualElement_list.begin(), m_VisualElement_list.end(), element), m_VisualElement_list.end());
+	SDL_UnlockMutex(m_VisualElement_list_lock);
+
+	cout << "[" << get_Id() << "]" << " Video - Rem VisualElement  (" << element->get_Id() << ")" << endl;
+}
+
+void Video::rem_underLayer_gen(VisualElement *element)
+{
+	SDL_LockMutex(m_UnderLayer_list_lock);
+	m_UnderLayer_list.erase(std::remove(m_UnderLayer_list.begin(), m_UnderLayer_list.end(), element), m_UnderLayer_list.end());
+	SDL_UnlockMutex(m_UnderLayer_list_lock);
+
+	cout << "[" << get_Id() << "]" << " Video - Rem UnderLayer  (" << element->get_Id() << ")" << endl;
+}
+
+int Video::rem_visualElement(const unsigned int& id)
+{
+	for (vector<VisualElement *>::iterator iter = m_VisualElement_list.begin();
+			iter != m_VisualElement_list.end(); ++iter) {
+		VisualElement *elem = *iter;
+
+		if (elem->get_Id() == id) {
+			rem_visualElement_gen(elem);
+			return 0;
+		}
+	}
+
+	for (vector<VisualElement *>::iterator iter = m_UnderLayer_list.begin();
+			iter != m_UnderLayer_list.end(); ++iter) {
+		VisualElement *elem = *iter;
+
+		if (elem->get_Id() == id) {
+			rem_underLayer_gen(elem);
+			return 0;
+		}
+	}
+
+	cout << "[" << get_Id() << "]" << " Video - No element found to be removed!" << endl;
+
+	return -1;
+}
+
+/*************************************************************************************************/
+int Video::push_under_layer(VisualElement *layer)
 {
 	if (m_UnderLayer_list.size() == UNDERLAYER_MAX_SIZE) {
+		cout << "[" << get_Id() << "]" << " Video - UnderLayer's list is full." << endl;
 		return -1;
 	}
-	m_UnderLayer_list.push_back(layer);
 
+	SDL_LockMutex(m_UnderLayer_list_lock);
+	m_UnderLayer_list.push_back(layer);
+	SDL_UnlockMutex(m_UnderLayer_list_lock);
+
+	cout << "[" << get_Id() << "]" << " Video - New UnderLayer  (" << layer->get_Id() << ")" << endl;
 	return 0;
 }
 
 /*************************************************************************************************/
 void Video::pop_under_layer(void)
 {
+	SDL_LockMutex(m_UnderLayer_list_lock);
 	m_UnderLayer_list.pop_back();
-}
-
-/*************************************************************************************************/
-void Video::start(void)
-{
-	set_updateScreen(true);
-}
-
-/*************************************************************************************************/
-void Video::freeze(void)
-{
-	set_updateScreen(false);
+	SDL_UnlockMutex(m_UnderLayer_list_lock);
 }
 
 /*************************************************************************************************/
@@ -139,31 +160,10 @@ bool Video::get_updateScreen(void)
 }
 
 /*************************************************************************************************/
-void Video::draw_underLayer(void)
-{
-	// verificar offset. layers as visualElements instead of Surfaces.
-	for (vector<SDL_Surface *>::iterator iter = m_UnderLayer_list.begin();
-			iter != m_UnderLayer_list.end(); ++iter) {
-			SDL_BlitSurface(*iter, NULL, m_Screen, NULL);
-	}
-}
-
-/*************************************************************************************************/
-void Video::draw_visualElements(void)
-{
-	for (vector<VisualElement *>::iterator iter = m_VisualElement_list.begin();
-			iter != m_VisualElement_list.end(); ++iter) {
-			SDL_Rect element_offset = (*iter)->get_offset();
-			SDL_BlitSurface((*iter)->get_viewpoint(), NULL, m_Screen, &element_offset);
-	}
-}
-
-/*************************************************************************************************/
 
 void Video::set_caption(const string& caption)
 {
-	m_Title = caption;
-	SDL_WM_SetCaption(m_Title.c_str(), NULL);
+	SDL_WM_SetCaption(caption.c_str(), NULL);
 }
 
 /*************************************************************************************************/
@@ -178,13 +178,19 @@ void Video::set_update_interval(const int& interval)
 /*************************************************************************************************/
 int Video::video_thread(void)
 {
-	while(true) {
+	while(m_KeepRunning) {
+
 		if (get_updateScreen() == true) {
-			draw_underLayer();
-			draw_visualElements();
-			if (m_ScreenMode != VIDEO_VIRTUAL_SCREEN) {
-				SDL_Flip(m_Screen);
-			}
+
+			SDL_LockMutex(m_UnderLayer_list_lock);
+			Viewpoints::draw_visual_list(m_UnderLayer_list, m_Screen);
+			SDL_UnlockMutex(m_UnderLayer_list_lock);
+
+			SDL_LockMutex(m_VisualElement_list_lock);
+			Viewpoints::draw_visual_list(m_VisualElement_list, m_Screen);
+			SDL_UnlockMutex(m_VisualElement_list_lock);
+
+			SDL_Flip(m_Screen);
 		}
 
 		usleep(m_UpdateInterval_ms*1000);
