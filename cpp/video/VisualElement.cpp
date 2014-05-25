@@ -2,6 +2,7 @@
 #include "Viewpoints.h"
 
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -33,6 +34,7 @@ m_Id(VisualElement::generate_id())
 		Viewpoints::load_surface(img_source.c_str(), &img);
 		if (img == NULL) {
 			cout << "[" << get_Id() << "] Failed to load image source from \"" << img_source << "\"" << endl;
+			assert(0);
 		}
 		else {
 			set_viewpoint(img, 0);
@@ -155,6 +157,7 @@ SDL_Rect VisualElement::get_offset(void)
 }
 
 /*************************************************************************************************/
+
 int VisualElement::set_viewpoint(SDL_Surface *image, const unsigned int position)
 {
 	if (position >= MAX_VIEWPOINTS) {
@@ -169,7 +172,26 @@ int VisualElement::set_viewpoint(SDL_Surface *image, const unsigned int position
 }
 
 /*************************************************************************************************/
+
+int VisualElement::update_viewpoint(SDL_Surface *image, const unsigned int position)
+{
+	SDL_Rect offset = {0, 0, 0, 0};
+
+	if (position >= MAX_VIEWPOINTS) {
+		return -1;
+	}
+
+	SDL_LockMutex(m_Viewpoints_lock);
+	SDL_BlitSurface(image, &offset, m_Viewpoints[position], &offset);
+	SDL_UnlockMutex(m_Viewpoints_lock);
+
+	return 0;
+}
+
+/*************************************************************************************************/
+
 SDL_Surface *VisualElement::get_viewpoint(void)
 {
+	// Add a mutex somewhere around here.
 	return m_Viewpoints[get_viewposition()];
 }

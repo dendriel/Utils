@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <tr1/cstdint>
 
 #include "SDL/SDL.h"
 
@@ -49,8 +50,8 @@ public:
 	 * \return 0 if successfully filled the array; -1 if any error has occurred.
 	 */
 	static int build_viewpoints(const char *source,
-			const unsigned int positions,
-			const unsigned int views,
+			const uint32_t positions,
+			const uint32_t views,
 			SDL_Surface **viewpoints);
 
 	/**
@@ -64,7 +65,7 @@ public:
 	 */
 	static int build_layer(SDL_Surface **layer,
 			const st_element_pos layer_bounds,
-			const unsigned int *tile_list,
+			const uint32_t *tile_list,
 			st_element_pos& tile_size,
 			const std::string& source);
 
@@ -79,7 +80,7 @@ public:
 	 */
 	static int build_layer_hex(SDL_Surface **layer,
 			const st_element_pos layer_bounds,
-			const unsigned int *tile_list,
+			const uint32_t *tile_list,
 			const std::string& source,
 			const st_element_pos tile_size);
 
@@ -97,7 +98,7 @@ public:
 	 * \param height The height of the surface.
 	 * \return A pointer to the surface.
 	 */
-	static SDL_Surface *create_surface(const unsigned int& width, const unsigned int& height);
+	static SDL_Surface *create_surface(const uint32_t& width, const uint32_t& height);
 
 	/*
 	 * \brief Draw all elements from a VisualElement's list in the destination SDL Surface.

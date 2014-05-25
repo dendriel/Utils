@@ -38,7 +38,7 @@ using namespace std;
 {\
 	if ((_f) == NULL) {\
 		cout << "Error occurred at " << #_f << endl;\
-		return -1;\
+		assert(0);\
 	}\
 }
 
@@ -61,7 +61,7 @@ using namespace std;
  * \parameter x_max The width of the matrix.
  * \return The x coordinate in matrix representation.
  */
-inline unsigned int find_x(const unsigned int index, const unsigned int x_max)
+inline uint32_t find_x(const uint32_t index, const uint32_t x_max)
 {
 	return ((index % x_max) );
 }
@@ -74,7 +74,7 @@ inline unsigned int find_x(const unsigned int index, const unsigned int x_max)
  * \parameter x The x coordinate that must be previous calculated.
  * \return The y coordinate in matrix representation.
  */
-inline unsigned int find_y(const unsigned int index, const unsigned int x_max, const unsigned int x)
+inline uint32_t find_y(const uint32_t index, const uint32_t x_max, const uint32_t x)
 {
 	return (((index - x)/x_max) );
 }
@@ -86,7 +86,7 @@ inline unsigned int find_y(const unsigned int index, const unsigned int x_max, c
  * \parameter v The view (column) index.
  * \return The array position.
  */
-inline unsigned int find_index(const unsigned int p, const unsigned int v, const unsigned int vmax)
+inline uint32_t find_index(const uint32_t p, const uint32_t v, const uint32_t vmax)
 {
 	/*
 	 * Can't remember if was working on the way that is.. but this new formula works very well:
@@ -97,16 +97,13 @@ inline unsigned int find_index(const unsigned int p, const unsigned int v, const
 
 /*************************************************************************************************/
 
-int Viewpoints::build_viewpoints(const char *source,
-		const unsigned int positions,
-		const unsigned int views,
-		SDL_Surface **viewpoints)
+int Viewpoints::build_viewpoints(const char *source, const uint32_t positions, const uint32_t views, SDL_Surface **viewpoints)
 {
-	SDL_Surface *image_source;
+	SDL_Surface *image_source = NULL;
 	SDL_Rect viewpoint_size;
 	SDL_Surface* optimizedImage = NULL;
 	SDL_Surface *viewpoint = NULL;
-	unsigned int position;
+	uint32_t position;
 
 	CHK_NULL(image_source = SDL_LoadBMP(source));
 
@@ -142,7 +139,7 @@ int Viewpoints::build_viewpoints(const char *source,
 
 int Viewpoints::build_layer(SDL_Surface **layer,
 		const st_element_pos layer_bounds,
-		const unsigned int *tile_list,
+		const uint32_t *tile_list,
 		st_element_pos& tile_size,
 		const string& source)
 {
@@ -150,7 +147,7 @@ int Viewpoints::build_layer(SDL_Surface **layer,
 	SDL_Surface *layer_temp = NULL;
 	SDL_Rect tile_data = {0, 0, tile_size.x, tile_size.y};
 	SDL_Rect draw_offset = {0, 0, 0, 0};
-	const unsigned int tile_list_size = layer_bounds.x * layer_bounds.y;
+	const uint32_t tile_list_size = layer_bounds.x * layer_bounds.y;
 
 	/* Load map tile set. */
 	CHK_NULL((source_tileset = SDL_LoadBMP(source.c_str())));
@@ -160,9 +157,9 @@ int Viewpoints::build_layer(SDL_Surface **layer,
 			layer_bounds.x*tile_size.x, layer_bounds.y*tile_size.y,
 			BPP, rmask, gmask, bmask, amask)));
 
-	for (unsigned int i = 0; i < tile_list_size; ++i) {
-		unsigned int x;
-		unsigned int y;
+	for (uint32_t i = 0; i < tile_list_size; ++i) {
+		uint32_t x;
+		uint32_t y;
 
 		x = find_x(i, layer_bounds.x);
 		y = find_y(i, layer_bounds.x, x);
@@ -183,7 +180,7 @@ int Viewpoints::build_layer(SDL_Surface **layer,
 /*************************************************************************************************/
 
 int Viewpoints::build_layer_hex(SDL_Surface **layer, const st_element_pos layer_bounds,
-		const unsigned int *tile_list,
+		const uint32_t *tile_list,
 		const string& source,
 		const st_element_pos tile_size)
 {
@@ -191,7 +188,7 @@ int Viewpoints::build_layer_hex(SDL_Surface **layer, const st_element_pos layer_
 	SDL_Surface *layer_temp = NULL;
 	SDL_Rect tile_data = {0, 0, tile_size.x, tile_size.y};
 	SDL_Rect draw_offset = {0, 0, 0, 0};
-	const unsigned int tile_list_size = layer_bounds.x * layer_bounds.y;
+	const uint32_t tile_list_size = layer_bounds.x * layer_bounds.y;
 
 	/* Load map tile set. */
 	CHK_NULL((source_tileset = SDL_LoadBMP(source.c_str())));
@@ -202,9 +199,9 @@ int Viewpoints::build_layer_hex(SDL_Surface **layer, const st_element_pos layer_
 			layer_bounds.x*tile_size.x + tile_size.x, layer_bounds.y*tile_size.y,
 			BPP, rmask, gmask, bmask, amask)));
 
-	for (unsigned int i = 0; i < tile_list_size; ++i) {
-		unsigned int x;
-		unsigned int y;
+	for (uint32_t i = 0; i < tile_list_size; ++i) {
+		uint32_t x;
+		uint32_t y;
 
 		x = find_x(i, layer_bounds.x);
 		y = find_y(i, layer_bounds.x, x);
@@ -226,10 +223,10 @@ int Viewpoints::build_layer_hex(SDL_Surface **layer, const st_element_pos layer_
 
 int Viewpoints::load_surface(const char *source, SDL_Surface **surface)
 {
-	SDL_Surface *image_source;
+	SDL_Surface *image_source = NULL;
 
 	CHK_NULL(image_source = SDL_LoadBMP(source));
-	CHK_NULL((*surface = SDL_DisplayFormat(image_source)));
+	CHK_NULL(*surface = SDL_DisplayFormat(image_source));
 
 	SDL_SetColorKey(*surface , SDL_SRCCOLORKEY, SDL_MapRGB((*surface)->format, RED, GREEN, BLUE));
 
@@ -238,9 +235,13 @@ int Viewpoints::load_surface(const char *source, SDL_Surface **surface)
 
 /*************************************************************************************************/
 
-SDL_Surface *Viewpoints::Viewpoints::create_surface(const unsigned int& width, const unsigned int& height)
+SDL_Surface *Viewpoints::create_surface(const uint32_t& width, const uint32_t& height)
 {
-	return SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, rmask, gmask, bmask, amask);
+	SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, rmask, gmask, bmask, amask);
+
+	assert(surface != NULL);
+
+	return surface;
 }
 
 /*************************************************************************************************/

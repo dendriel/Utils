@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+
 #include "SDL/SDL.h"
 #include "SDL/SDL_thread.h"
 
@@ -18,15 +19,26 @@ using namespace std;
 #define VIDEO_SCREEN_TITLE (string)"My Game"
 #define UNDERLAYER_MAX_SIZE 5
 
+/*
+ * \brief Screen operating mode.
+ */
+typedef enum en_screen_mode {
+	S_MODE_UNSET = 0,
+	S_MODE_VIRTUAL = 1,
+	S_MODE_REAL = 2,
+} en_screen_mode;
 
 class Video {
-private:
+protected:
 	static unsigned int s_Video_ids;
 	vector <VisualElement *> m_VisualElement_list;
 	vector <VisualElement *> m_UnderLayer_list;
+	en_screen_mode m_Mode;		//!< Screen operation mode.
 	SDL_Surface *m_Screen;		//!< Represents the monitor screen.
+	string m_Caption;			//!< Window title
+	SDL_Rect m_Screen_size;		//!< Screen size in pixels.
 	int m_UpdateInterval_ms;	//!< Update interval in mili seconds.
-	unsigned int m_Id;			//!< Video unique identifier.
+	unsigned int m_Id;				//!< Video unique identifier.
 	bool m_UpdateScreen_f;		//!< True: update the screen; False: hold until is true.
 	bool m_KeepRunning;			//!< Flag to halt the update screen thread.
 
@@ -66,6 +78,12 @@ public:
 
 	int push_under_layer(VisualElement *layer);
 	void pop_under_layer(void);
+
+	/*
+	 * \brief Initialize the screen. Must be called before starting.
+	 * \param mode The screen execution mode.
+	 */
+	void init(en_screen_mode mode=S_MODE_REAL);
 
 	/*
 	 * \brief Start updating the screen with layers and visual elements.
@@ -110,7 +128,7 @@ public:
 		return m_Id;
 	}
 
-private:
+protected:
 	int video_thread(void);
 
 	/*

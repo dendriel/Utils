@@ -9,37 +9,20 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <assert.h>
+#include <tr1/cstdint>
 
 #include "Viewpoints.h"
 
 
 using namespace std;
 
-unsigned int VirtualVideo::s_VirtualVideo_ids;
 
-VirtualVideo::VirtualVideo(Video *real_screen,
-		const unsigned int& screen_width,
-		const unsigned int& screen_height,
-		const unsigned int& update_interval):
-m_RealVideo(real_screen),
-m_UpdateInterval_ms(update_interval),
-m_UpdateScreen_f(true),
-m_KeepRunning(true),
-m_Id(generate_id())
+VirtualVideo::VirtualVideo(Video *real_screen, const uint32_t& width, const uint32_t& height, const uint32_t& interval):
+Video(width, height, "", interval),
+m_RealVideo(real_screen)
 {
 	cout << "CREATED Virtual Video [" << get_Id() << "]" << endl;
-
-	/* Create layer surface.*/
-	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(screen_width, screen_height), 0);
-	if(m_VirtualScreen.get_viewpoint() == NULL) {
-		cout << "Failed to set SDL Video Mode." << endl;
-	}
-
-	// This is the problem.
-	m_RealVideo->push_under_layer(&m_VirtualScreen);
-
-	m_UpdateScreen_f_lock = SDL_CreateMutex();
-	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
 }
 
 VirtualVideo::~VirtualVideo()
@@ -57,58 +40,37 @@ VirtualVideo::~VirtualVideo()
 
 	m_RealVideo->rem_visualElement(m_VirtualScreen.get_Id());
 
-	SDL_DestroyMutex(m_UpdateScreen_f_lock);
 	cout << "REMOVED VirtualVideo [" << m_Id << "] Thread ret(" << ret << ")" << endl;
-
-//	unsigned int i;
-//	unsigned int vec_size = m_VisualElement_list.size();
-//	for (i = 0; i < vec_size; i++) {
-//		VisualElement *elem = m_VisualElement_list[i];
-//		delete elem;
-//	}
-//	m_VisualElement_list.clear();
-//
-//	vec_size = m_UnderLayer_list.size();
-//	for (i = 0; i < vec_size; i++) {
-//		VisualElement *elem = m_UnderLayer_list[i];
-//		delete elem;
-//	}
-//	m_UnderLayer_list.clear();
-//
-//	cout << "[" << m_Id << "] Will remove UnderLayer " << m_VirtualScreen.get_Id() << endl;
-//	m_RealVideo->rem_visualElement(m_VirtualScreen.get_Id());
 }
 
 /*************************************************************************************************/
-void VirtualVideo::set_updateScreen(bool value)
+void VirtualVideo::init(en_screen_mode mode)
 {
+	/* Create layer surface.*/
+	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.w, m_Screen_size.h), 0);
+	if(m_VirtualScreen.get_viewpoint() == NULL) {
+		cout << "Failed to create surface for Virtual Video." << endl;
+		assert(0);
+	}
 
-	SDL_LockMutex(m_UpdateScreen_f_lock);
-	m_UpdateScreen_f = value;
-	SDL_UnlockMutex(m_UpdateScreen_f_lock);
-}
+	m_RealVideo->push_under_layer(&m_VirtualScreen);
 
-/*************************************************************************************************/
-bool VirtualVideo::get_updateScreen(void)
-{
-	bool update_screen;
+	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
 
-	SDL_LockMutex(m_UpdateScreen_f_lock);
-	update_screen = m_UpdateScreen_f;
-	SDL_UnlockMutex(m_UpdateScreen_f_lock);
-
-	return update_screen;
+	cout << "INITIALIZED Virtual Video [" << get_Id() << "]" << endl;
 }
 
 /*************************************************************************************************/
 int VirtualVideo::virtual_video_thread(void)
 {
+
 	while(m_KeepRunning) {
 
 		if (get_updateScreen() == true) {
-			Viewpoints::draw_visual_list(m_UnderLayer_list, m_VirtualScreen.m_Viewpoints[0]);
-			Viewpoints::draw_visual_list(m_VisualElement_list, m_VirtualScreen.m_Viewpoints[0]);
-			//SDL_Flip(m_Screen);
+			Viewpoints::draw_visual_list(m_UnderLayer_list, m_Screen);
+			Viewpoints::draw_visual_list(m_VisualElement_list, m_Screen);
+
+			m_VirtualScreen.update_viewpoint(m_Screen);
 		}
 
 		usleep(m_UpdateInterval_ms*1000);

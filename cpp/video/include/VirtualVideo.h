@@ -16,40 +16,23 @@
 #include "VisualElement.h"
 
 
-class VirtualVideo {
+class VirtualVideo: Video {
 private:
-	static unsigned int s_VirtualVideo_ids;
+	static uint32_t s_VirtualVideo_ids;
 
 	VisualElement m_VirtualScreen;
-	vector <VisualElement *> m_VisualElement_list;
-	vector <VisualElement *> m_UnderLayer_list;
-	Video *m_RealVideo;			//!< Represents the real monitor screen when initialized as virtual screen.
-	int m_UpdateInterval_ms;	//!< Update interval in mili seconds.
-	bool m_UpdateScreen_f;		//!< True: update the screen; False: hold until is true.
-	bool m_KeepRunning;			//!< Flag to halt the update screen thread.
-	unsigned int m_Id;			//!< Virtual Video unique identifier.
-
-	SDL_Thread *m_Updater_tid;
-	SDL_mutex *m_UpdateScreen_f_lock;
+	Video *m_RealVideo;			//!< Represents the real monitor screen when initialized as virtual screen
 
 public:
 	/*
 	 * \brief Class constructor for a virtual screen. Virtual screen will be the concept given to surfaces
 	 * that will be drawn inside the real screen and will represent sub-screens.
 	 */
-	VirtualVideo(Video *real_screen, const unsigned int& screen_width, const unsigned int& screen_height,
-			const unsigned int& update_interval = SCREEN_UPDATE_DEFAULT_TIME_MS);
+	VirtualVideo(Video *real_screen, const uint32_t& width, const uint32_t& height, const uint32_t& interval = SCREEN_UPDATE_DEFAULT_TIME_MS);
 
 	virtual ~VirtualVideo();
 
-	/*
-	 * \brief Get Video identifier.
-	 * \return The Video identifier.
-	 */
-	inline unsigned int get_Id(void)
-	{
-		return m_Id;
-	}
+	void init(en_screen_mode mode=S_MODE_REAL);
 
 	/*
 	 * \brief Thread wrapper. Probably there is an easier way to do this.
@@ -62,19 +45,6 @@ public:
 private:
 
 	int virtual_video_thread(void);
-
-	bool get_updateScreen(void);
-	void set_updateScreen(bool value);
-
-
-	/*
-	 * \brief Get an unique Video ID.
-	 * \return An unique ID.
-	 */
-	static unsigned int generate_id(void)
-	{
-		return s_VirtualVideo_ids++;
-	}
 };
 
 #endif /* VIRTUALVIDEO_H_ */

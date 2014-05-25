@@ -36,7 +36,9 @@ public:
 	void add_offset(const int x, const int y);
 	SDL_Rect get_offset(void);
 
-	int set_viewpoint(SDL_Surface *image, const unsigned int position);
+	int set_viewpoint(SDL_Surface *image, const unsigned int position=0);
+
+	int update_viewpoint(SDL_Surface *image, const unsigned int position=0);
 
 	int set_viewposition(const unsigned int position);
 	unsigned int get_viewposition(void);

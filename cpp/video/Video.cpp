@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <assert.h>
 #include <unistd.h>
-#include <pthread.h>
 
 #include "Viewpoints.h"
 
@@ -12,7 +11,8 @@ unsigned int Video::s_Video_ids;
 
 /*************************************************************************************************/
 
-Video::Video(const unsigned int& screen_width, const unsigned int& screen_height, const string& title, const unsigned int& update_interval):
+Video::Video(const unsigned int& width, const unsigned int& height, const string& title, const unsigned int& update_interval):
+m_Mode(S_MODE_UNSET),
 m_UpdateInterval_ms(update_interval),
 m_Id(Video::generate_id()),
 m_UpdateScreen_f(false),
@@ -20,17 +20,12 @@ m_KeepRunning(true)
 {
 	cout << "CREATED Video [" << m_Id << "]" << endl;
 
-	m_Screen = SDL_SetVideoMode(screen_width, screen_height, VIDEO_SCREEN_BPP, VIDEO_SCREEN_FLAGS);
-	if(m_Screen == NULL) {
-		cout << "Failed to set SDL Video Mode." << endl;
-	}
-
-	SDL_WM_SetCaption(title.c_str(), NULL);
+	m_Screen_size.x = width;
+	m_Screen_size.y = height;
 
 	m_UpdateScreen_f_lock = SDL_CreateMutex();
 	m_VisualElement_list_lock = SDL_CreateMutex();
 	m_UnderLayer_list_lock = SDL_CreateMutex();
-	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
 }
 
 
@@ -54,6 +49,20 @@ Video::~Video()
 	cout << "REMOVED Video [" << m_Id << "] Thread ret(" << ret << ")" << endl;
 }
 
+/*************************************************************************************************/
+void Video::init(en_screen_mode mode)
+{
+	m_Screen = SDL_SetVideoMode(m_Screen_size.w, m_Screen_size.h, VIDEO_SCREEN_BPP, VIDEO_SCREEN_FLAGS);
+	if(m_Screen == NULL) {
+		cout << "Failed to set SDL Video Mode." << endl;
+		assert(0);
+	}
+	SDL_WM_SetCaption(m_Caption.c_str(), NULL);
+
+	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
+
+	cout << "INITIALIZED Real Video [" << get_Id() << "]" << endl;
+}
 
 /*************************************************************************************************/
 void Video::add_visualElement(VisualElement *element)
