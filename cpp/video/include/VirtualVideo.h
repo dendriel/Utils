@@ -16,7 +16,7 @@
 #include "VisualElement.h"
 
 
-class VirtualVideo: Video {
+class VirtualVideo: public Video {
 private:
 	static uint32_t s_VirtualVideo_ids;
 
@@ -32,7 +32,7 @@ public:
 
 	virtual ~VirtualVideo();
 
-	void init(en_screen_mode mode=S_MODE_REAL);
+	void init(void);
 
 	/*
 	 * \brief Thread wrapper. Probably there is an easier way to do this.

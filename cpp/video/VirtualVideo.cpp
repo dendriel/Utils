@@ -22,7 +22,7 @@ VirtualVideo::VirtualVideo(Video *real_screen, const uint32_t& width, const uint
 Video(width, height, "", interval),
 m_RealVideo(real_screen)
 {
-	cout << "CREATED Virtual Video [" << get_Id() << "]" << endl;
+	cout << "Video [" << get_Id() << "]" << " is Virtual." << endl;
 }
 
 VirtualVideo::~VirtualVideo()
@@ -40,22 +40,28 @@ VirtualVideo::~VirtualVideo()
 
 	m_RealVideo->rem_visualElement(m_VirtualScreen.get_Id());
 
+	delete m_Screen;
+
 	cout << "REMOVED VirtualVideo [" << m_Id << "] Thread ret(" << ret << ")" << endl;
 }
 
 /*************************************************************************************************/
-void VirtualVideo::init(en_screen_mode mode)
+void VirtualVideo::init(void)
 {
 	/* Create layer surface.*/
-	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.w, m_Screen_size.h), 0);
+	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.x, m_Screen_size.y));
 	if(m_VirtualScreen.get_viewpoint() == NULL) {
 		cout << "Failed to create surface for Virtual Video." << endl;
 		assert(0);
 	}
 
+	m_Screen = Viewpoints::create_surface(m_Screen_size.x, m_Screen_size.y);
+
 	m_RealVideo->push_under_layer(&m_VirtualScreen);
 
 	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
+
+	start();
 
 	cout << "INITIALIZED Virtual Video [" << get_Id() << "]" << endl;
 }
@@ -67,10 +73,16 @@ int VirtualVideo::virtual_video_thread(void)
 	while(m_KeepRunning) {
 
 		if (get_updateScreen() == true) {
+			SDL_LockMutex(m_UnderLayer_list_lock);
 			Viewpoints::draw_visual_list(m_UnderLayer_list, m_Screen);
-			Viewpoints::draw_visual_list(m_VisualElement_list, m_Screen);
+			SDL_UnlockMutex(m_UnderLayer_list_lock);
+			SDL_Flip(m_Screen);
 
-			m_VirtualScreen.update_viewpoint(m_Screen);
+			SDL_LockMutex(m_VisualElement_list_lock);
+			Viewpoints::draw_visual_list(m_VisualElement_list, m_Screen);
+			SDL_UnlockMutex(m_VisualElement_list_lock);
+
+			assert(m_VirtualScreen.update_viewpoint(m_Screen) == 0);
 		}
 
 		usleep(m_UpdateInterval_ms*1000);

@@ -1,18 +1,18 @@
 #include "Video.h"
 
-#include <iostream>
 #include <algorithm>
 #include <assert.h>
 #include <unistd.h>
+#include <tr1/cstdint>
 
 #include "Viewpoints.h"
 
-unsigned int Video::s_Video_ids;
+uint32_t Video::s_Video_ids;
 
 /*************************************************************************************************/
 
-Video::Video(const unsigned int& width, const unsigned int& height, const string& title, const unsigned int& update_interval):
-m_Mode(S_MODE_UNSET),
+Video::Video(const uint32_t& width, const uint32_t& height, const string& title, const uint32_t& update_interval):
+m_Caption(title),
 m_UpdateInterval_ms(update_interval),
 m_Id(Video::generate_id()),
 m_UpdateScreen_f(false),
@@ -43,6 +43,8 @@ Video::~Video()
 	m_VisualElement_list.clear();
 	m_UnderLayer_list.clear();
 
+	delete m_Screen;
+
 	SDL_DestroyMutex(m_UpdateScreen_f_lock);
 	SDL_DestroyMutex(m_VisualElement_list_lock);
 	SDL_DestroyMutex(m_UnderLayer_list_lock);
@@ -50,9 +52,9 @@ Video::~Video()
 }
 
 /*************************************************************************************************/
-void Video::init(en_screen_mode mode)
+void Video::init(void)
 {
-	m_Screen = SDL_SetVideoMode(m_Screen_size.w, m_Screen_size.h, VIDEO_SCREEN_BPP, VIDEO_SCREEN_FLAGS);
+	m_Screen = SDL_SetVideoMode(m_Screen_size.x, m_Screen_size.y, VIDEO_SCREEN_BPP, VIDEO_SCREEN_FLAGS);
 	if(m_Screen == NULL) {
 		cout << "Failed to set SDL Video Mode." << endl;
 		assert(0);
@@ -62,6 +64,22 @@ void Video::init(en_screen_mode mode)
 	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
 
 	cout << "INITIALIZED Real Video [" << get_Id() << "]" << endl;
+
+	start();
+}
+
+/*************************************************************************************************/
+void Video::start(void)
+{
+	set_updateScreen(true);
+	std::cout << "Video [" << this->get_Id() << "] started." << endl;
+}
+
+/*************************************************************************************************/
+void Video::freeze(void)
+{
+	set_updateScreen(false);
+	std::cout << "Video [" << get_Id() << "] freeze." << endl;
 }
 
 /*************************************************************************************************/
@@ -96,7 +114,7 @@ void Video::rem_underLayer_gen(VisualElement *element)
 	cout << "[" << get_Id() << "]" << " Video - Rem UnderLayer  (" << element->get_Id() << ")" << endl;
 }
 
-int Video::rem_visualElement(const unsigned int& id)
+int Video::rem_visualElement(const uint32_t& id)
 {
 	for (vector<VisualElement *>::iterator iter = m_VisualElement_list.begin();
 			iter != m_VisualElement_list.end(); ++iter) {
