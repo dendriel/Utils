@@ -13,16 +13,21 @@
 #include <tr1/cstdint>
 
 #include "Viewpoints.h"
-
+#include "debug.h"
 
 using namespace std;
 
 
-VirtualVideo::VirtualVideo(Video *real_screen, const uint32_t& width, const uint32_t& height, const uint32_t& interval):
+VirtualVideo::VirtualVideo(Video *real_screen, const uint16_t& width, const uint16_t& height, const int16_t& x, const int16_t& y, const uint32_t& interval):
 Video(width, height, "", interval),
 m_RealVideo(real_screen)
 {
-	cout << "Video [" << get_Id() << "]" << " is Virtual." << endl;
+	m_Screen_size.x = x;
+	m_Screen_size.y = y;
+	m_Screen_size.w = width;
+	m_Screen_size.h = height;
+
+	debug("Video [" << m_Id << "]" << " is Virtual.");
 }
 
 VirtualVideo::~VirtualVideo()
@@ -42,27 +47,43 @@ VirtualVideo::~VirtualVideo()
 
 	delete m_Screen;
 
-	cout << "REMOVED VirtualVideo [" << m_Id << "] Thread ret(" << ret << ")" << endl;
+	debug("Virtual Video [" << m_Id << "] Thread ret(" << ret << ") destroyed.");
 }
 
 /*************************************************************************************************/
-void VirtualVideo::init(void)
+void VirtualVideo::init(bool auto_start)
 {
 	/* Create layer surface.*/
-	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.x, m_Screen_size.y));
+	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.w, m_Screen_size.h));
+	/* Make surface transparent. */
+	Viewpoints::paint_surface(m_VirtualScreen.get_viewpoint());
+	m_Screen = Viewpoints::create_surface(m_Screen_size.w, m_Screen_size.h);
+	/* Make surface transparent. */
+	Viewpoints::paint_surface(m_Screen);
 
-	m_Screen = Viewpoints::create_surface(m_Screen_size.x, m_Screen_size.y);
+	/* Set virtual screen offset. */
+	m_VirtualScreen.set_offset(m_Screen_size.x, m_Screen_size.y);
 
 	m_RealVideo->push_under_layer(&m_VirtualScreen);
 
 	m_Updater_tid = SDL_CreateThread(&video_thread_wrapper, this);
 
-	start();
+	if (auto_start) {
+		start();
+	}
 
-	cout << "INITIALIZED Virtual Video [" << get_Id() << "]" << endl;
+	debug("Virtual Video [" << m_Id << "] initialized.");
 }
 
 /*************************************************************************************************/
+
+void VirtualVideo::set_offset(const int16_t x, const int16_t y)
+{
+	m_VirtualScreen.set_offset(x, y);
+}
+
+/*************************************************************************************************/
+
 int VirtualVideo::virtual_video_thread(void)
 {
 

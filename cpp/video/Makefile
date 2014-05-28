@@ -10,7 +10,7 @@
 TOP = .
 
 CPP = g++
-CFLAGS = -Wall -Werror -c
+CFLAGS = -Wall -Werror -DDEBUG -c
 
 INCLUDE=include
 TARGET=libvideo.a

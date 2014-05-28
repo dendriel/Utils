@@ -4,6 +4,8 @@
 #include <iostream>
 #include <assert.h>
 
+#include "debug.h"
+
 using namespace std;
 
 unsigned int VisualElement::s_visualElement_ids;
@@ -30,14 +32,14 @@ m_Id(VisualElement::generate_id())
 		SDL_Surface *img = NULL;
 		Viewpoints::load_surface(img_source.c_str(), &img);
 		if (img == NULL) {
-			cout << "[" << get_Id() << "] Failed to load image source from \"" << img_source << "\"" << endl;
-			assert(0);
+			assert_exit("VisualElement [" << m_Id << "] Failed to load image source from \"" << img_source << "\"");
 		}
 		else {
 			set_viewpoint(img, 0);
 		}
 	}
-	cout << "CREATED VisualElement [" << m_Id << "]" << endl;
+
+	debug("VisualElement [" << m_Id << "] created.");
 }
 
 /*************************************************************************************************/
@@ -54,7 +56,7 @@ VisualElement::~VisualElement(void)
 	SDL_DestroyMutex(m_Viewpoints_lock);
 	SDL_DestroyMutex(m_Index_lock);
 
-	cout << "REMOVED VisualElement [" << m_Id << "]" << endl;
+	debug("VisualElement [" << m_Id << "] destroyed.");
 }
 
 /*************************************************************************************************/
@@ -125,20 +127,20 @@ unsigned int VisualElement::get_viewposition(void)
 
 
 /*************************************************************************************************/
-void VisualElement::set_offset(const int x, const int y)
+void VisualElement::set_offset(const int16_t x, const int16_t y)
 {
 	SDL_LockMutex(m_Offset_lock);
-	set_x(x);
-	set_y(y);
+	m_Offset.x = x;
+	m_Offset.y = y;
 	SDL_UnlockMutex(m_Offset_lock);
 }
 
 /*************************************************************************************************/
-void VisualElement::add_offset(const int x, const int y)
+void VisualElement::add_offset(const int16_t x, const int16_t y)
 {
 	SDL_LockMutex(m_Offset_lock);
-	set_x(m_Offset.x + x);
-	set_y(m_Offset.y + y);
+	m_Offset.x = m_Offset.x + x;
+	m_Offset.y = m_Offset.y + y;
 	SDL_UnlockMutex(m_Offset_lock);
 }
 
@@ -178,8 +180,7 @@ int VisualElement::update_viewpoint(SDL_Surface *image, const unsigned int posit
 	}
 
 	if (m_Viewpoints[position] == NULL) {
-		cout << "NULL POINTER DEFERENCE. [" << m_Id << "] Trying to update a NULL surface in the visual element." << endl;
-		assert(0);
+		assert_exit("NULL POINTER DEFERENCE. [" << m_Id << "] Trying to update a NULL surface in the visual element.");
 	}
 
 	SDL_LockMutex(m_Viewpoints_lock);
@@ -193,6 +194,11 @@ int VisualElement::update_viewpoint(SDL_Surface *image, const unsigned int posit
 
 SDL_Surface *VisualElement::get_viewpoint(void)
 {
-	// Add a mutex somewhere around here.
-	return m_Viewpoints[get_viewposition()];
+	SDL_Surface *viewpoint = NULL;
+
+	SDL_LockMutex(m_Viewpoints_lock);
+	viewpoint = m_Viewpoints[get_viewposition()];
+	SDL_UnlockMutex(m_Viewpoints_lock);
+
+	return viewpoint;
 }

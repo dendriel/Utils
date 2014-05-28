@@ -26,18 +26,13 @@ using namespace std;
 #define amask 0xff000000
 #endif
 
-#define RED 255
-#define GREEN 0
-#define BLUE 255
-#define BPP 32
-
 /*************************************************************************************************/
 
 //!< Checks and print error if the operation fails.
 #define CHK_NULL(_f)\
 {\
 	if ((_f) == NULL) {\
-		cout << "Error occurred at " << #_f << endl;\
+		cout << "[ViewPoints] Error occurred at " << #_f << endl;\
 		assert(0);\
 	}\
 }
@@ -46,8 +41,17 @@ using namespace std;
 #define CHK(_f, _r)\
 {\
 	if ((_f) == (_r)) {\
-		cout << "Error occurred at " << #_f << "; Returned: " << _r << endl;\
+		cout << "[ViewPoints] Error occurred at " << #_f << "; Returned: " << _r << endl;\
 		return -1;\
+	}\
+}
+
+#define ASSERT(_f)\
+{\
+	int32_t _ret;\
+	if ((_ret = _f) != 0) {\
+		cout << "[ViewPoints] Error occurred at " << #_f << "; Returned: " << _ret << endl;\
+		assert(0);\
 	}\
 }
 
@@ -263,3 +267,31 @@ void Viewpoints::draw_visual_list(vector <VisualElement *>& source, SDL_Surface 
 			SDL_BlitSurface(elem_viewpoint, NULL, destn, &elem_offset);
 	}
 }
+
+/*************************************************************************************************/
+//!< Facility interface.
+void Viewpoints::paint_surface(SDL_Surface *surface, const uint8_t r, const uint8_t g, const uint8_t b)
+{
+	paint_surface(surface, SDL_MapRGB(surface->format, r, g, b));
+}
+
+void Viewpoints::paint_surface(SDL_Surface *surface, uint32_t color)
+{
+	/* Fill whole surface with color. */
+	ASSERT(SDL_FillRect(surface, NULL, color));
+}
+
+/*************************************************************************************************/
+
+#ifdef RED
+#undef RED
+#endif /* RED */
+#ifdef GREEN
+#undef GREEN
+#endif /* GREEN */
+#ifdef BLUE
+#undef BLUE
+#endif /* BLUE */
+#ifdef BPP
+#undef BPP
+#endif /* BPP */

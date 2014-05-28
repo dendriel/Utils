@@ -2,6 +2,7 @@
 #define VISUALELEMENT_H
 
 #include <string>
+#include <tr1/cstdint>
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_mutex.h"
@@ -32,8 +33,8 @@ public:
 	void set_y(const int y);
 	int get_y(void);
 
-	void set_offset(const int x, const int y);
-	void add_offset(const int x, const int y);
+	void set_offset(const int16_t x, const int16_t y);
+	void add_offset(const int16_t x, const int16_t y);
 	SDL_Rect get_offset(void);
 
 	int set_viewpoint(SDL_Surface *image, const unsigned int position=0);

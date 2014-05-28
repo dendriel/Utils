@@ -31,12 +31,12 @@ typedef struct {
 
 class Viewpoints {
 public:
-	/*
+	/**
 	 * Constructor.
 	 */
 	Viewpoints();
 
-	/*
+	/**
 	 * Destructor.
 	 */
 	virtual ~Viewpoints();
@@ -84,7 +84,7 @@ public:
 			const std::string& source,
 			const st_element_pos tile_size);
 
-	/*
+	/**
 	 * \brief Loads an optimized SDL surface from a source.
 	 * \param source The source image (bmp) to load from.
 	 * \param surface A pointer to put the optimized surface.
@@ -92,7 +92,7 @@ public:
 	 */
 	static int load_surface(const char *source, SDL_Surface **surface);
 
-	/*
+	/**
 	 * \brief Creates a SDL Surface.
 	 * \param width The width of the surface.
 	 * \param height The height of the surface.
@@ -100,12 +100,26 @@ public:
 	 */
 	static SDL_Surface *create_surface(const uint32_t& width, const uint32_t& height);
 
-	/*
+	/**
 	 * \brief Draw all elements from a VisualElement's list in the destination SDL Surface.
 	 * \param source The list with VisualElements
 	 * \param destn The SDL Surface that will received the list.
 	 */
 	static void draw_visual_list(std::vector <VisualElement *>& source, SDL_Surface *destn);
+
+
+	/**
+	 * \brief Paint the whole surface with a color.
+	 * \param surface The surface to be painted.
+	 * \param r Red color.
+	 * \param g Blue color.
+	 * \param b Green color.
+	 * \param color A color value.
+	 */
+	static void paint_surface(SDL_Surface *surface, const uint8_t r=RED, const uint8_t g=GREEN, const uint8_t b=BLUE);
+	static void paint_surface(SDL_Surface *surface, uint32_t color);
+
 };
+
 
 #endif /* VIEWPOINTS_H_ */
