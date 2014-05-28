@@ -50,10 +50,6 @@ void VirtualVideo::init(void)
 {
 	/* Create layer surface.*/
 	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.x, m_Screen_size.y));
-	if(m_VirtualScreen.get_viewpoint() == NULL) {
-		cout << "Failed to create surface for Virtual Video." << endl;
-		assert(0);
-	}
 
 	m_Screen = Viewpoints::create_surface(m_Screen_size.x, m_Screen_size.y);
 
@@ -76,7 +72,6 @@ int VirtualVideo::virtual_video_thread(void)
 			SDL_LockMutex(m_UnderLayer_list_lock);
 			Viewpoints::draw_visual_list(m_UnderLayer_list, m_Screen);
 			SDL_UnlockMutex(m_UnderLayer_list_lock);
-			SDL_Flip(m_Screen);
 
 			SDL_LockMutex(m_VisualElement_list_lock);
 			Viewpoints::draw_visual_list(m_VisualElement_list, m_Screen);

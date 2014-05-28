@@ -13,9 +13,6 @@ VisualElement::VisualElement(const int x, const int y, string img_source):
 m_Index(0),
 m_Id(VisualElement::generate_id())
 {
-
-	cout << "CREATED VisualElement [" << m_Id << "]" << endl;
-
 	/* Initialize the viewpoints vector. */
 	memset(m_Viewpoints, 0, sizeof(m_Viewpoints));
 
@@ -40,6 +37,7 @@ m_Id(VisualElement::generate_id())
 			set_viewpoint(img, 0);
 		}
 	}
+	cout << "CREATED VisualElement [" << m_Id << "]" << endl;
 }
 
 /*************************************************************************************************/
@@ -160,7 +158,7 @@ SDL_Rect VisualElement::get_offset(void)
 
 int VisualElement::set_viewpoint(SDL_Surface *image, const unsigned int position)
 {
-	if (position >= MAX_VIEWPOINTS) {
+	if ((position >= MAX_VIEWPOINTS) || (image == NULL)) {
 		return -1;
 	}
 
@@ -175,14 +173,17 @@ int VisualElement::set_viewpoint(SDL_Surface *image, const unsigned int position
 
 int VisualElement::update_viewpoint(SDL_Surface *image, const unsigned int position)
 {
-	//SDL_Rect offset = {0, 0, 0, 0};
-
-	if (position >= MAX_VIEWPOINTS) {
+	if ((position >= MAX_VIEWPOINTS) || (image == NULL)) {
 		return -1;
 	}
 
+	if (m_Viewpoints[position] == NULL) {
+		cout << "NULL POINTER DEFERENCE. [" << m_Id << "] Trying to update a NULL surface in the visual element." << endl;
+		assert(0);
+	}
+
 	SDL_LockMutex(m_Viewpoints_lock);
-	SDL_BlitSurface(image, NULL, m_Viewpoints[position], NULL);
+	assert(SDL_BlitSurface(image, NULL, m_Viewpoints[position], NULL) == 0);
 	SDL_UnlockMutex(m_Viewpoints_lock);
 
 	return 0;

@@ -228,6 +228,8 @@ int Viewpoints::load_surface(const char *source, SDL_Surface **surface)
 	CHK_NULL(image_source = SDL_LoadBMP(source));
 	CHK_NULL(*surface = SDL_DisplayFormat(image_source));
 
+	delete image_source;
+
 	SDL_SetColorKey(*surface , SDL_SRCCOLORKEY, SDL_MapRGB((*surface)->format, RED, GREEN, BLUE));
 
 	return 0;
@@ -237,11 +239,18 @@ int Viewpoints::load_surface(const char *source, SDL_Surface **surface)
 
 SDL_Surface *Viewpoints::create_surface(const uint32_t& width, const uint32_t& height)
 {
+	SDL_Surface *optimized_surface = NULL;
 	SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, rmask, gmask, bmask, amask);
 
-	assert(surface != NULL);
+	CHK_NULL(optimized_surface = SDL_DisplayFormat(surface));
 
-	return surface;
+	delete surface;
+
+	SDL_SetColorKey(optimized_surface , SDL_SRCCOLORKEY, SDL_MapRGB(optimized_surface->format, RED, GREEN, BLUE));
+
+	assert(optimized_surface != NULL);
+
+	return optimized_surface;
 }
 
 /*************************************************************************************************/
