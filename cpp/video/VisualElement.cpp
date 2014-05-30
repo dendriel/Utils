@@ -35,7 +35,7 @@ m_Id(VisualElement::generate_id())
 			assert_exit("VisualElement [" << m_Id << "] Failed to load image source from \"" << img_source << "\"");
 		}
 		else {
-			set_viewpoint(img, 0);
+			set_viewpoint(img);
 		}
 	}
 

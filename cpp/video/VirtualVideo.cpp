@@ -55,11 +55,8 @@ void VirtualVideo::init(bool auto_start)
 {
 	/* Create layer surface.*/
 	m_VirtualScreen.set_viewpoint(Viewpoints::create_surface(m_Screen_size.w, m_Screen_size.h));
-	/* Make surface transparent. */
-	Viewpoints::paint_surface(m_VirtualScreen.get_viewpoint());
+
 	m_Screen = Viewpoints::create_surface(m_Screen_size.w, m_Screen_size.h);
-	/* Make surface transparent. */
-	Viewpoints::paint_surface(m_Screen);
 
 	/* Set virtual screen offset. */
 	m_VirtualScreen.set_offset(m_Screen_size.x, m_Screen_size.y);

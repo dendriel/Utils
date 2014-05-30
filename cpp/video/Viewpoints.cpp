@@ -195,13 +195,9 @@ int Viewpoints::build_layer_hex(SDL_Surface **layer, const st_element_pos layer_
 	const uint32_t tile_list_size = layer_bounds.x * layer_bounds.y;
 
 	/* Load map tile set. */
-	CHK_NULL((source_tileset = SDL_LoadBMP(source.c_str())));
-	SDL_SetColorKey(source_tileset , SDL_SRCCOLORKEY, SDL_MapRGB(source_tileset->format, RED, GREEN, BLUE));
+	load_surface(source.c_str(), &source_tileset);
 
-	/* Create layer surface.*/
-	CHK_NULL((layer_temp = SDL_CreateRGBSurface(SDL_SWSURFACE,
-			layer_bounds.x*tile_size.x + tile_size.x, layer_bounds.y*tile_size.y,
-			BPP, rmask, gmask, bmask, amask)));
+	CHK_NULL(layer_temp = create_surface(layer_bounds.x*tile_size.x + tile_size.x, layer_bounds.y*tile_size.y));
 
 	for (uint32_t i = 0; i < tile_list_size; ++i) {
 		uint32_t x;
@@ -218,7 +214,9 @@ int Viewpoints::build_layer_hex(SDL_Surface **layer, const st_element_pos layer_
 		SDL_BlitSurface(source_tileset, &tile_data, layer_temp, &draw_offset);
 	}
 
-	CHK_NULL((*layer = SDL_DisplayFormat(layer_temp)));
+	CHK_NULL(*layer = SDL_DisplayFormat(layer_temp));
+
+	delete layer_temp;
 
 	return 0;
 }
@@ -234,7 +232,7 @@ int Viewpoints::load_surface(const char *source, SDL_Surface **surface)
 
 	delete image_source;
 
-	SDL_SetColorKey(*surface , SDL_SRCCOLORKEY, SDL_MapRGB((*surface)->format, RED, GREEN, BLUE));
+	assert(SDL_SetColorKey(*surface , SDL_SRCCOLORKEY, SDL_MapRGB((*surface)->format, RED, GREEN, BLUE)) == 0);
 
 	return 0;
 }
@@ -250,7 +248,10 @@ SDL_Surface *Viewpoints::create_surface(const uint32_t& width, const uint32_t& h
 
 	delete surface;
 
-	SDL_SetColorKey(optimized_surface , SDL_SRCCOLORKEY, SDL_MapRGB(optimized_surface->format, RED, GREEN, BLUE));
+	assert(SDL_SetColorKey(optimized_surface , SDL_SRCCOLORKEY, SDL_MapRGB(optimized_surface->format, RED, GREEN, BLUE)) == 0);
+
+	/* Make surface transparent. */
+	Viewpoints::paint_surface(optimized_surface);
 
 	assert(optimized_surface != NULL);
 
