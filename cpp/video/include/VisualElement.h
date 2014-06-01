@@ -45,6 +45,7 @@ public:
 	unsigned int get_viewposition(void);
 	SDL_Surface *get_viewpoint(void);
 
+public:
 	/*
 	 * \brief Get VisualElement identifier.
 	 * \return The VisualElement identifier.
@@ -54,7 +55,6 @@ public:
 		return m_Id;
 	}
 
-public:
 	SDL_Surface *m_Viewpoints[MAX_VIEWPOINTS];
 
 	/*

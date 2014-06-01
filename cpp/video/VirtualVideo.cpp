@@ -39,9 +39,10 @@ VirtualVideo::~VirtualVideo()
 	m_KeepRunning = false;
 	SDL_WaitThread(m_Updater_tid, &ret);
 
-	/* Clear but not delete. */
+	/* Clear but not delete. Maybe Video destructor also is executed.*/
 	m_VisualElement_list.clear();
 	m_UnderLayer_list.clear();
+	m_Message_list.clear();
 
 	m_RealVideo->rem_visualElement(m_VirtualScreen.get_Id());
 
@@ -94,6 +95,10 @@ int VirtualVideo::virtual_video_thread(void)
 			SDL_LockMutex(m_VisualElement_list_lock);
 			Viewpoints::draw_visual_list(m_VisualElement_list, m_Screen);
 			SDL_UnlockMutex(m_VisualElement_list_lock);
+
+			SDL_LockMutex(m_Message_list_Lock);
+			Viewpoints::draw_visual_list(m_Message_list, m_Screen);
+			SDL_UnlockMutex(m_Message_list_Lock);
 
 			assert(m_VirtualScreen.update_viewpoint(m_Screen) == 0);
 		}

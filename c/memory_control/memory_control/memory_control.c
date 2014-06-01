@@ -47,7 +47,7 @@ static void memctrl_finalize_data(void)
 int memctrl_initialize(void)
 {
 	if (moth_data.initialized == true) {
-		return;
+		return 0;
 	}
 
 	int ret;

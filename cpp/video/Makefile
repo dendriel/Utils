@@ -30,10 +30,12 @@ $(TARGET): $(SRCS) $(INC)
 	ar rvs $(TARGET) $(OBJS)
 	@chmod $(OBJS_MOD) $(TARGET)
 	@echo "Author: Vitor Rozsa; vitor.rozsa@hotmail.com; github.com/dendriel; Brazil" > $(INFO_FILE)
+	@echo "Depends on libSDL; libSDL_main; libSDL_ttf" >> $(INFO_FILE)
 	@echo "Compiled at" >> $(INFO_FILE)
 	@date >> $(INFO_FILE)
 	#just to make my life easier.
 	cp $(TARGET) ../../../games/Cpp/warfare/lib
+	cp video.txt ../../../games/Cpp/warfare/lib
 	cp include/* ../../../games/Cpp/warfare/lib/include
 	@echo "> Done."
 

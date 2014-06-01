@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <assert.h>
 
 /**************************************************************************************************
  * Debug utilities.
